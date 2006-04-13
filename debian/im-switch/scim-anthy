@@ -1,0 +1,10 @@
+XIM=SCIM
+if [ -e /usr/bin/skim ]; then
+    XIM_PROGRAM=/usr/bin/skim
+else
+    XIM_PROGRAM=/usr/bin/scim
+fi
+XIM_ARGS="-d"
+GTK_IM_MODULE=scim
+QT_IM_MODULE=scim
+DEPENDS="scim,anthy,scim-gtk2-immodule | scim-qtimm"

@@ -1,0 +1,29 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 02_atok_sty_predict_key.dpatch by Ikuya Awashiro <ikuya@oooug.jp>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad scim-anthy-0.8.0~/data/atok.sty scim-anthy-0.8.0/data/atok.sty
+--- scim-anthy-0.8.0~/data/atok.sty	2005-12-06 22:48:44.000000000 +0900
++++ scim-anthy-0.8.0/data/atok.sty	2005-12-14 15:36:52.000000000 +0900
+@@ -32,7 +32,8 @@
+ HalfKatakanaModeKey         = 
+ CircleTypingMethodKey       = Romaji,Alt+Romaji
+ 
+-ConvertKey                  = space,Shift+space
++ConvertKey                  = space,Henkan,Shift+space,Shift+Henkan
++PredictKey                  = Tab
+ CancelKey                   = Escape,BackSpace,Control+h,Control+bracketleft
+ CommitKey                   = Return,Control+m
+ ReconvertKey                = Shift+Henkan
+@@ -57,7 +58,7 @@
+ 
+ CandidatesPageUpKey         = Shift+Henkan
+ CandidatesPageDownKey       = Henkan
+-SelectNextCandidateKey      = space,Henkan,Shift+space,Shift+Henkan
++SelectNextCandidateKey      = space,Tab,Henkan,Shift+space,Shift+Henkan
+ SelectPrevCandidateKey      = Up
+ 
+ SelectCandidates1Key        = 1
