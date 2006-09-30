@@ -3,12 +3,12 @@ Section: utils
 Priority: optional
 Maintainer: Ikuya Awashiro <ikuya@oooug.jp>
 Uploaders: Akira TAGOH <tagoh@debian.org>
-Build-Depends: debhelper (>= 4.0.0), dpatch (>= 1.11), libanthy-dev, scim (>= 1.3), scim-dev (>= 1.3), gettext, autotools-dev, pkg-config
-Standards-Version: 3.6.2
+Build-Depends: debhelper (>= 4.0.0), dpatch (>= 1.11), libanthy-dev, scim (>= 1.3), scim-dev (>= 1.3), autotools-dev, pkg-config
+Standards-Version: 3.7.2
 
 Package: scim-anthy
 Architecture: any
-Depends: ${shlibs:Depends}, anthy, scim (<< 1.5) 
+Depends: ${shlibs:Depends}, anthy, scim (<< 1.5)
 Suggests: kasumi
 Description: SCIM IMEngine module for Anthy
  Smart Common Input Method platform (SCIM) is an input method server

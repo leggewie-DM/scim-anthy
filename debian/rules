@@ -77,8 +77,6 @@ install: build
 	   $(CURDIR)/debian/scim-anthy/usr/lib/scim-1.0/`pkg-config --variable=scim_binary_version scim`/IMEngine/libanthy.a
 	mv $(CURDIR)/debian/scim-anthy/usr/lib/scim-1.0/`pkg-config --variable=scim_binary_version scim`/SetupUI/anthy-imengine-setup.a \
 	   $(CURDIR)/debian/scim-anthy/usr/lib/scim-1.0/`pkg-config --variable=scim_binary_version scim`/SetupUI/libanthy-imengine-setup.a
-	install -d $(CURDIR)/debian/scim-anthy/etc/X11/xinit/xinput.d/
-	install -m 644 $(CURDIR)/debian/im-switch/scim-anthy $(CURDIR)/debian/scim-anthy/etc/X11/xinit/xinput.d/
 
 # Build architecture-dependent files here.
 binary-arch: build install

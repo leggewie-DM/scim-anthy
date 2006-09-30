@@ -1,25 +1,56 @@
-scim-anthy (0.8.0-1ubuntu2) dapper; urgency=low
+scim-anthy (1.2.1-1) unstable; urgency=low
 
-  * check for skim in the im-switch file and sets XIM_PROGRAM=skim if
-    it is installed (fixes the problem that skim is not started currently
-    automatically in kubuntu)
-  * Sets QT_IM_MODULE=scim and add scim-qtimm to the dependency in 
-    debian/im-switch/scim-anthy. 
+  * New upstream release
 
- -- Hou ZhengPeng <zhengpeng.hou@gmail.com>  Thu, 13 Apr 2006 10:17:35 +0800
+ -- Ikuya Awashiro <ikuya@oooug.jp>  Sat, 30 Sep 2006 15:55:00 +0900
 
-scim-anthy (0.8.0-1ubuntu1) dapper; urgency=low
+scim-anthy (1.2.0-1) unstable; urgency=low
 
-  * Remove the dependency on im-switch.
-  * Sponsored upload for Hou ZhengPeng <zhengpeng.hou@gmail.com>
+  * New upstream release
 
- -- Jonathan Riddell <jriddell@ubuntu.com>  Wed,  8 Feb 2006 00:00:02 +0800
+ -- Ikuya Awashiro <ikuya@oooug.jp>  Sun, 30 Jul 2006 00:19:14 +0900
+
+scim-anthy (1.0.0-3) unstable; urgency=low
+
+  * Acknowledge the NMU fix (Closes: #368173)
+  * Standards-Version bumped to 3.7.2 (no changes requied)
+
+ -- Ikuya Awashiro <ikuya@oooug.jp>  Sun, 18 Jun 2006 21:58:20 +0900
+
+scim-anthy (1.0.0-2.0.1) unstable; urgency=low
+
+  * NMU
+  * im-switch configuration files are moved to scim (and scim-bridge)
+    packages.
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 17 Jun 2006 06:32:37 +0900
+
+scim-anthy (1.0.0-2) unstable; urgency=low
+
+  * debian/im-switch/scim-anthy: scim-bridge support. 
+
+ -- Ikuya Awashiro <ikuya@oooug.jp>  Mon, 10 Apr 2006 22:02:19 +0900
+
+scim-anthy (1.0.0-1) unstable; urgency=low
+
+  * New upstream release
+  * debian/im-switch/scim-anthy: auto-detect for libqscim.so.   
+
+ -- Ikuya Awashiro <ikuya@oooug.jp>  Thu, 30 Mar 2006 23:31:23 +0900
+
+scim-anthy (0.9.0-1) unstable; urgency=low
+
+  * New upstream release
+  * debian/patches/02_atok_sty_predict_key.dpatch:
+    Removed. Already included by upstream.
+
+ -- Ikuya Awashiro <ikuya@oooug.jp>  Fri, 20 Jan 2006 04:20:17 +0000
 
 scim-anthy (0.8.0-1) unstable; urgency=low
 
   * New upstream release
   * debian/patches/10_scim-plugin-module-install-dir.dpatch:
-    updated.
+    Updated.
   * debian/patches/02_atok_sty_predict_key.dpatch:
     Add predict keys to data/atok.sty.
 
