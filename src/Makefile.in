@@ -91,7 +91,7 @@ am_anthy_imengine_setup_la_OBJECTS =  \
 	anthy_imengine_setup_la-scim_anthy_prefs.lo \
 	anthy_imengine_setup_la-scim_anthy_utils.lo \
 	anthy_imengine_setup_la-scim_anthy_table_editor.lo \
-	anthy_imengine_setup_la-scim_color_button.lo
+	anthy_imengine_setup_la-scim_anthy_color_button.lo
 anthy_imengine_setup_la_OBJECTS =  \
 	$(am_anthy_imengine_setup_la_OBJECTS)
 @SCIM_BUILD_SETUP_TRUE@am_anthy_imengine_setup_la_rpath = -rpath \
@@ -316,7 +316,7 @@ noinst_HEADERS = \
 	scim_anthy_setup_kana.h \
 	scim_anthy_table_editor.h \
 	scim_anthy_utils.h \
-	scim_color_button.h \
+	scim_anthy_color_button.h \
 	scim_anthy_helper.h
 
 
@@ -366,7 +366,7 @@ anthy_imengine_setup_la_SOURCES = \
 	scim_anthy_prefs.cpp \
 	scim_anthy_utils.cpp \
 	scim_anthy_table_editor.cpp \
-	scim_color_button.cpp
+	scim_anthy_color_button.cpp
 
 anthy_imengine_setup_la_CFLAGS = @SCIM_GTKUTILS_CFLAGS@ \
 				  @SCIM_CFLAGS@ \
@@ -389,7 +389,7 @@ anthy_imengine_setup_la_LDFLAGS = -avoid-version \
 # Helper Program
 #
 @SCIM_BUILD_HELPER_TRUE@HELPER_MODULE = anthy-imengine-helper.la
-helpermoduledir = @SCIM_MODULEDIR@/`pkg-config --variable=scim_binary_version scim`/Helper
+helpermoduledir = @SCIM_MODULEDIR@/Helper
 helpermodule_LTLIBRARIES = $(HELPER_MODULE)
 anthy_imengine_helper_la_SOURCES = scim_anthy_helper.cpp
 anthy_imengine_helper_la_CFLAGS = @GTK2_CFLAGS@ \
@@ -536,6 +536,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_imengine_helper_la-scim_anthy_helper.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_color_button.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_default_tables.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_prefs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_setup.Plo@am__quote@
@@ -544,7 +545,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_style_file.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_table_editor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_utils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_imengine_setup_la-scim_color_button.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_la-scim_anthy_action.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_la-scim_anthy_conversion.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anthy_la-scim_anthy_default_tables.Plo@am__quote@
@@ -643,12 +643,12 @@ anthy_imengine_setup_la-scim_anthy_table_editor.lo: scim_anthy_table_editor.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(anthy_imengine_setup_la_CXXFLAGS) $(CXXFLAGS) -c -o anthy_imengine_setup_la-scim_anthy_table_editor.lo `test -f 'scim_anthy_table_editor.cpp' || echo '$(srcdir)/'`scim_anthy_table_editor.cpp
 
-anthy_imengine_setup_la-scim_color_button.lo: scim_color_button.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(anthy_imengine_setup_la_CXXFLAGS) $(CXXFLAGS) -MT anthy_imengine_setup_la-scim_color_button.lo -MD -MP -MF "$(DEPDIR)/anthy_imengine_setup_la-scim_color_button.Tpo" -c -o anthy_imengine_setup_la-scim_color_button.lo `test -f 'scim_color_button.cpp' || echo '$(srcdir)/'`scim_color_button.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/anthy_imengine_setup_la-scim_color_button.Tpo" "$(DEPDIR)/anthy_imengine_setup_la-scim_color_button.Plo"; else rm -f "$(DEPDIR)/anthy_imengine_setup_la-scim_color_button.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='scim_color_button.cpp' object='anthy_imengine_setup_la-scim_color_button.lo' libtool=yes @AMDEPBACKSLASH@
+anthy_imengine_setup_la-scim_anthy_color_button.lo: scim_anthy_color_button.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(anthy_imengine_setup_la_CXXFLAGS) $(CXXFLAGS) -MT anthy_imengine_setup_la-scim_anthy_color_button.lo -MD -MP -MF "$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_color_button.Tpo" -c -o anthy_imengine_setup_la-scim_anthy_color_button.lo `test -f 'scim_anthy_color_button.cpp' || echo '$(srcdir)/'`scim_anthy_color_button.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_color_button.Tpo" "$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_color_button.Plo"; else rm -f "$(DEPDIR)/anthy_imengine_setup_la-scim_anthy_color_button.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='scim_anthy_color_button.cpp' object='anthy_imengine_setup_la-scim_anthy_color_button.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(anthy_imengine_setup_la_CXXFLAGS) $(CXXFLAGS) -c -o anthy_imengine_setup_la-scim_color_button.lo `test -f 'scim_color_button.cpp' || echo '$(srcdir)/'`scim_color_button.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(anthy_imengine_setup_la_CXXFLAGS) $(CXXFLAGS) -c -o anthy_imengine_setup_la-scim_anthy_color_button.lo `test -f 'scim_anthy_color_button.cpp' || echo '$(srcdir)/'`scim_anthy_color_button.cpp
 
 anthy_la-scim_anthy_factory.lo: scim_anthy_factory.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(anthy_la_CXXFLAGS) $(CXXFLAGS) -MT anthy_la-scim_anthy_factory.lo -MD -MP -MF "$(DEPDIR)/anthy_la-scim_anthy_factory.Tpo" -c -o anthy_la-scim_anthy_factory.lo `test -f 'scim_anthy_factory.cpp' || echo '$(srcdir)/'`scim_anthy_factory.cpp; \

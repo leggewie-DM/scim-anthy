@@ -1,3 +1,30 @@
+scim-anthy (1.2.4-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Fix gcc-4.3 FBTFS, patch by KiBi (Closes: #441585)
+
+ -- Marc 'HE' Brockschmidt <he@debian.org>  Sun, 16 Mar 2008 23:26:54 +0100
+
+scim-anthy (1.2.4-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Ikuya Awashiro <ikuya@oooug.jp>  Sun, 03 Jun 2007 01:39:53 +0900
+
+scim-anthy (1.2.3-1) unstable; urgency=low
+
+  * New upstream release
+  * debian/patches/10_scim-plugin-module-install-dir: removed.
+    (Closes: #422950)
+
+ -- Ikuya Awashiro <ikuya@oooug.jp>  Sat, 12 May 2007 22:28:13 +0900
+
+scim-anthy (1.2.2-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Ikuya Awashiro <ikuya@oooug.jp>  Tue, 14 Nov 2006 22:37:40 +0900
+
 scim-anthy (1.2.1-1) unstable; urgency=low
 
   * New upstream release
