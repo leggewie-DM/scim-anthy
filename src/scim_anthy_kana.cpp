@@ -23,6 +23,8 @@
 #include "scim_anthy_default_tables.h"
 #include "scim_anthy_utils.h"
 
+#include <cstring>
+
 using namespace scim_anthy;
 
 static bool

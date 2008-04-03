@@ -1,12 +1,23 @@
 #! /bin/sh /usr/share/dpatch/dpatch-run
-## 11_gcc-4.3_fixes.dpatch by Cyril Brulebois <cyril.brulebois@enst-bretagne.fr>
+## 11-gcc43.dpatch
 ##
 ## All lines beginning with `## DP:' are a description of the patch.
 ## DP: No description.
 
 @DPATCH@
---- a/src/scim_anthy_kana.cpp
-+++ b/src/scim_anthy_kana.cpp
+--- scim-anthy-1.2.4.orig/src/scim_anthy_setup.cpp
++++ scim-anthy-1.2.4/src/scim_anthy_setup.cpp
+@@ -30,6 +30,8 @@
+ #include <gtk/gtk.h>
+ #include <gdk/gdkkeysyms.h>
+ 
++#include <cstring>
++
+ #define Uses_SCIM_CONFIG_BASE
+ #define Uses_SCIM_EVENT
+ #define SCIM_ANTHY_USE_GTK
+--- scim-anthy-1.2.4.orig/src/scim_anthy_kana.cpp
++++ scim-anthy-1.2.4/src/scim_anthy_kana.cpp
 @@ -23,6 +23,8 @@
  #include "scim_anthy_default_tables.h"
  #include "scim_anthy_utils.h"
@@ -16,8 +27,8 @@
  using namespace scim_anthy;
  
  static bool
---- a/src/scim_anthy_preedit.cpp
-+++ b/src/scim_anthy_preedit.cpp
+--- scim-anthy-1.2.4.orig/src/scim_anthy_preedit.cpp
++++ scim-anthy-1.2.4/src/scim_anthy_preedit.cpp
 @@ -26,6 +26,8 @@
  #include "scim_anthy_preedit.h"
  #include "scim_anthy_utils.h"
@@ -27,8 +38,8 @@
  using namespace scim_anthy;
  
  static ConvRule *get_period_rule              (TypingMethod method,
---- a/src/scim_anthy_utils.cpp
-+++ b/src/scim_anthy_utils.cpp
+--- scim-anthy-1.2.4.orig/src/scim_anthy_utils.cpp
++++ scim-anthy-1.2.4/src/scim_anthy_utils.cpp
 @@ -24,6 +24,8 @@
  #include "scim_anthy_utils.h"
  #include "scim_anthy_default_tables.h"
@@ -38,8 +49,8 @@
  namespace scim_anthy {
  
  bool
---- a/src/scim_anthy_prefs.cpp
-+++ b/src/scim_anthy_prefs.cpp
+--- scim-anthy-1.2.4.orig/src/scim_anthy_prefs.cpp
++++ scim-anthy-1.2.4/src/scim_anthy_prefs.cpp
 @@ -23,6 +23,8 @@
  #include "scim_anthy_prefs.h"
  #include "scim_anthy_intl.h"
@@ -49,14 +60,3 @@
  namespace scim_anthy {
  
  BoolConfigData config_bool_common [] =
---- a/src/scim_anthy_setup.cpp
-+++ b/src/scim_anthy_setup.cpp
-@@ -45,6 +45,8 @@
- #include "scim_anthy_utils.h"
- #include "scim_anthy_color_button.h"
- 
-+#include <cstring>
-+
- using namespace scim;
- using namespace scim_anthy;
- 

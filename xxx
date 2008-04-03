@@ -1,0 +1,55 @@
+--- scim-anthy-1.2.4.orig/src/scim_anthy_setup.cpp
++++ scim-anthy-1.2.4/src/scim_anthy_setup.cpp
+@@ -30,6 +30,8 @@
+ #include <gtk/gtk.h>
+ #include <gdk/gdkkeysyms.h>
+ 
++#include <cstring>
++
+ #define Uses_SCIM_CONFIG_BASE
+ #define Uses_SCIM_EVENT
+ #define SCIM_ANTHY_USE_GTK
+--- scim-anthy-1.2.4.orig/src/scim_anthy_kana.cpp
++++ scim-anthy-1.2.4/src/scim_anthy_kana.cpp
+@@ -23,6 +23,8 @@
+ #include "scim_anthy_default_tables.h"
+ #include "scim_anthy_utils.h"
+ 
++#include <cstring>
++
+ using namespace scim_anthy;
+ 
+ static bool
+--- scim-anthy-1.2.4.orig/src/scim_anthy_preedit.cpp
++++ scim-anthy-1.2.4/src/scim_anthy_preedit.cpp
+@@ -26,6 +26,8 @@
+ #include "scim_anthy_preedit.h"
+ #include "scim_anthy_utils.h"
+ 
++#include <cstring>
++
+ using namespace scim_anthy;
+ 
+ static ConvRule *get_period_rule              (TypingMethod method,
+--- scim-anthy-1.2.4.orig/src/scim_anthy_utils.cpp
++++ scim-anthy-1.2.4/src/scim_anthy_utils.cpp
+@@ -24,6 +24,8 @@
+ #include "scim_anthy_utils.h"
+ #include "scim_anthy_default_tables.h"
+ 
++#include <cstring>
++
+ namespace scim_anthy {
+ 
+ bool
+--- scim-anthy-1.2.4.orig/src/scim_anthy_prefs.cpp
++++ scim-anthy-1.2.4/src/scim_anthy_prefs.cpp
+@@ -23,6 +23,8 @@
+ #include "scim_anthy_prefs.h"
+ #include "scim_anthy_intl.h"
+ 
++#include <cstring>
++
+ namespace scim_anthy {
+ 
+ BoolConfigData config_bool_common [] =

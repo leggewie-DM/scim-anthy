@@ -1,9 +1,15 @@
-scim-anthy (1.2.4-1.1) unstable; urgency=low
+scim-anthy (1.2.4-1ubuntu2) hardy; urgency=low
 
-  * Non-maintainer upload.
-  * Fix gcc-4.3 FBTFS, patch by KiBi (Closes: #441585)
+  * Rebuild with recent g++ compiler version.
 
- -- Marc 'HE' Brockschmidt <he@debian.org>  Sun, 16 Mar 2008 23:26:54 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 03 Apr 2008 11:25:01 +0000
+
+scim-anthy (1.2.4-1ubuntu1) gutsy; urgency=low
+
+  * Fix build failures with g++-4.3.
+  * Set Ubuntu maintainer address.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 10 Sep 2007 15:57:50 +0200
 
 scim-anthy (1.2.4-1) unstable; urgency=low
 

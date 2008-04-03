@@ -1,7 +1,8 @@
 Source: scim-anthy
 Section: utils
 Priority: optional
-Maintainer: Ikuya Awashiro <ikuya@oooug.jp>
+Maintainer: Ubuntu Core developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Ikuya Awashiro <ikuya@oooug.jp>
 Uploaders: Akira TAGOH <tagoh@debian.org>
 Build-Depends: debhelper (>= 4.0.0), dpatch (>= 1.11), libanthy-dev, scim (>= 1.4.6), libscim-dev (>= 1.4.6), autotools-dev, pkg-config
 Standards-Version: 3.7.2
