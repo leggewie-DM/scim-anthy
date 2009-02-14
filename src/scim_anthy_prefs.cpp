@@ -24,8 +24,6 @@
 #include "scim_anthy_prefs.h"
 #include "scim_anthy_intl.h"
 
-#include <cstring>
-
 namespace scim_anthy {
 
 BoolConfigData config_bool_common [] =

@@ -28,8 +28,6 @@
 #include "scim_anthy_preedit.h"
 #include "scim_anthy_utils.h"
 
-#include <cstring>
-
 using namespace scim_anthy;
 
 static ConvRule *get_period_rule              (TypingMethod method,

@@ -25,8 +25,6 @@
 #include "scim_anthy_utils.h"
 #include "scim_anthy_default_tables.h"
 
-#include <cstring>
-
 namespace scim_anthy {
 
 bool

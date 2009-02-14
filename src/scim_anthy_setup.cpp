@@ -31,8 +31,6 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
-#include <cstring>
-
 #define Uses_SCIM_CONFIG_BASE
 #define Uses_SCIM_EVENT
 #define SCIM_ANTHY_USE_GTK

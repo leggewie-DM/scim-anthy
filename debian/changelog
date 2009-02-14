@@ -1,15 +1,17 @@
-scim-anthy (1.2.4-1ubuntu2) hardy; urgency=low
+scim-anthy (1.2.7-0ubuntu1) jaunty; urgency=low
 
-  * Rebuild with recent g++ compiler version.
+  * New upstream release (LP: #329435)
+  * debian/patches/00list: removed 11_gcc-4.3_fixes.dpatch
+    Already included by upstream.
 
- -- Matthias Klose <doko@ubuntu.com>  Thu, 03 Apr 2008 11:25:01 +0000
+ -- Ikuya Awashiro <ikuya@fruitsbasket.info>  Sat, 14 Feb 2009 15:12:42 +0000
 
-scim-anthy (1.2.4-1ubuntu1) gutsy; urgency=low
+scim-anthy (1.2.4-1.1) unstable; urgency=low
 
-  * Fix build failures with g++-4.3.
-  * Set Ubuntu maintainer address.
+  * Non-maintainer upload.
+  * Fix gcc-4.3 FBTFS, patch by KiBi (Closes: #441585)
 
- -- Matthias Klose <doko@ubuntu.com>  Mon, 10 Sep 2007 15:57:50 +0200
+ -- Marc 'HE' Brockschmidt <he@debian.org>  Sun, 16 Mar 2008 23:26:54 +0100
 
 scim-anthy (1.2.4-1) unstable; urgency=low
 
