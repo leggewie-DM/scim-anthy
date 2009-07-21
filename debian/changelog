@@ -1,3 +1,18 @@
+scim-anthy (1.2.7-1) unstable; urgency=low
+
+  * new upstream release, push back from Ubuntu Jaunty. (Closes: #503764)
+  * debian/control
+    - drop Tagoh-san from uploaders. (Closes: #508203)
+    - add myself to uploaders
+    - add Homepage and Vcs-* fields
+    - recommend instead of suggest kasumi (LP: #332041)
+  * update standards to 3.8.2
+    - update to debhelper 5
+    - use config.sub and config.guess from host instead of patching
+    - better error handling for distclean
+
+ -- Rolf Leggewie <foss@rolf.leggewie.biz>  Tue, 21 Jul 2009 17:34:03 +0200
+
 scim-anthy (1.2.7-0ubuntu1) jaunty; urgency=low
 
   * New upstream release (LP: #329435)

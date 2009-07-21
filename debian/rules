@@ -29,6 +29,10 @@ config.status: configure
 configure: configure-stamp
 configure-stamp: patch-stamp
 	dh_testdir
+	for file in config.sub config.guess po/ja.gmo po/de.gmo ; do \
+		mv -f "$$file" "$$file".orig ;\
+		[ ! -r /usr/share/misc/"$$file" ] || cp -f /usr/share/misc/"$$file" "$$file" ;\
+	done
 	# Add here commands to configure the package.
 	CFLAGS="$(CFLAGS)" ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info
 
@@ -50,18 +54,14 @@ build-stamp:  config.status
 clean: unpatch
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp 
-	rm -f po/*.gmo
+	rm -f build-stamp config.log libtool
+
+	for file in config.sub config.guess po/ja.gmo po/de.gmo ; do \
+		[ ! -r "$$file".orig ] || mv -f "$$file".orig "$$file" || : ;\
+	done
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) distclean
-
-ifneq "$(wildcard /usr/share/misc/config.sub)" ""
-	cp -f /usr/share/misc/config.sub config.sub
-endif
-ifneq "$(wildcard /usr/share/misc/config.guess)" ""
-	cp -f /usr/share/misc/config.guess config.guess
-endif
+	[ ! -f Makefile ] || $(MAKE) distclean
 
 	dh_clean 
 
