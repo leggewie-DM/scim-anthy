@@ -75,9 +75,11 @@ public:
     String         m_typing_method;
     String         m_conversion_mode;
     String         m_period_style;
+    String         m_symbol_style;
     String         m_space_type;
     String         m_ten_key_type;
     String         m_behavior_on_period;
+    String         m_behavior_on_focus_out;
 
     bool           m_show_candidates_label;
     bool           m_close_cand_win_on_select;
@@ -90,10 +92,15 @@ public:
     bool           m_romaji_half_symbol;
     bool           m_romaji_half_number;
     bool           m_romaji_allow_split;
+
+    bool           m_romaji_pseudo_ascii_mode;
+    bool           m_romaji_pseudo_ascii_blank_behavior;
+
     int            m_nicola_time;
     KeyEventList   m_left_thumb_keys;
     KeyEventList   m_right_thumb_keys;
 
+    String         m_dict_encoding;
     String         m_dict_admin_command;
     String         m_add_word_command;
 
@@ -104,6 +111,7 @@ public:
     bool           m_show_conv_mode_label;
     bool           m_show_typing_method_label;
     bool           m_show_period_style_label;
+    bool           m_show_symbol_style_label;
     bool           m_show_dict_label;
     bool           m_show_dict_admin_label;
     bool           m_show_add_word_label;

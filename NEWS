@@ -1,3 +1,45 @@
+Overview of Changes from scim-anthy-1.2.0 to scim-anthy-1.2.1
+==============================================================
+* Fix a problem that the romaji pending state aren't restored on pressing a
+  backspace or moving the caret has been fixed.
+  (Thanks Ryo Dairiki and Akira TAGOH)
+* Add a dictionary encoding preference into setup UI.
+* Revert the default dictionary encoding preference to EUC-JP.
+* Other minor fixes (Thanks Sutou).
+
+Overview of Changes from scim-anthy-1.0.0 to scim-anthy-1.2.0
+==============================================================
+* Add pseudo ASCII input mode. It enables users to enter ASCII letters during
+  Japanese mode. Thanks Akira TAGOH for your patch.
+* Enable reconversion feature on non-GTK+ application (It's a ad-hoc solition).
+  Thanks Takashi Nakamoto.
+* Enable to choose behavior on focus out.
+* Add predict key into some key bindings themes. Thanks Ikuya Awashiro.
+* Try EUC-JP-MS first when convert characters from Anthy to Unicode.
+* Add tsuki layout into the list of kana typing layouts. Thanks Sugi.
+* The bug that direct select keys doesn't work during predicting has been fixed.
+  Thanks TAGOH, UTUMI, Bando for your report.
+* Fix some wrong entries in Romaji tables. Thanks Jun Oizumi.
+* Fix a bug that commited clauses aren't cleared when the learning preferenece
+  is disabled. Thanks Jun Oizumi.
+
+Overview of Changes from scim-anthy-0.9.0 to scim-anthy-1.0.0
+==============================================================
+* Add symbol style preference (Thanks Akira TAGOH).
+* Don't activate direct select key when the lookup window isn't shown
+  (Thanks Akira TAGOH).
+* Fix credit.
+
+Overview of Changes from scim-anthy-0.8.0 to scim-anthy-0.9.0
+=============================================================
+* Add SKIM support (Provide as external package).
+* Add prediction key bindings to ATOK like key bindings theme.
+* Ensure to through space key event to enable application's specific feature
+  like Mozilla's scrolling feature (Thanks reporting > Yukiko Bando).
+* Fix double commiting bug on Wide Latin mode.
+  (Thanks Ryo Dairiki and UTUMI Hirosi)
+* Other minor fixes.
+
 Overview of Changes from scim-anthy-0.7.1 to scim-anthy-0.8.0
 =============================================================
 * Now scim-anthy requires scim-1.2.0 or later.

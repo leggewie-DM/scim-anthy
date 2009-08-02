@@ -37,22 +37,29 @@ namespace scim_anthy {
 class Key2KanaConvertor : public Key2KanaConvertorBase
 {
 public:
-    Key2KanaConvertor             (AnthyInstance    & anthy,
-                                   Key2KanaTableSet & tables);
-    virtual ~Key2KanaConvertor    ();
+    Key2KanaConvertor                        (AnthyInstance    & anthy,
+                                              Key2KanaTableSet & tables);
+    virtual ~Key2KanaConvertor               ();
 
-    bool       can_append         (const KeyEvent   & key);
-    bool       append             (const KeyEvent   & key,
-                                   WideString       & result,
-                                   WideString       & pending,
-                                   String           & raw);
-    void       clear              (void);
+    bool       can_append                    (const KeyEvent   & key,
+                                              bool               ignore_space = false);
+    bool       append                        (const KeyEvent   & key,
+                                              WideString       & result,
+                                              WideString       & pending,
+                                              String           & raw);
+    void       clear                         (void);
 
-    bool       is_pending         (void);
-    WideString get_pending        (void);
-    WideString flush_pending      (void);
-    void       reset_pending      (const WideString & result,
-                                   const String     & raw);
+    bool       is_pending                    (void);
+    WideString get_pending                   (void);
+    WideString flush_pending                 (void);
+    void       reset_pending                 (const WideString & result,
+                                              const String     & raw);
+    void       set_pseudo_ascii_mode         (int                mode)
+        { m_pseudo_ascii_mode = mode; }
+    bool       is_pseudo_ascii_mode          (void)
+        { return m_is_in_pseudo_ascii_mode; }
+    bool       process_pseudo_ascii_mode     (const WideString & wstr);
+    void       reset_pseudo_ascii_mode       (void);
 
 private:
     bool       append             (const String     & str,
@@ -66,6 +73,9 @@ private:
     // state
     WideString         m_pending;
     Key2KanaRule       m_exact_match;
+    int                m_pseudo_ascii_mode;
+    bool               m_is_in_pseudo_ascii_mode;
+    bool               m_reset_pseudo_ascii_mode;
 };
 
 }

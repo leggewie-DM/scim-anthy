@@ -84,7 +84,7 @@ public:
     void          convert                (const WideString &source,
                                           bool          single_segment = false);
     void          predict                (void);
-    void          clear                  (void);
+    void          clear                  (int           segment_id = -1);
     void          commit                 (int           segment_id = -1,
                                           bool          learn      = true);
 
@@ -114,6 +114,9 @@ public:
     int           get_selected_candidate (int           segment_id = -1);
     void          select_candidate       (int           candidate_id,
                                           int           segment_id = -1);
+
+    // prefereneces
+    bool          set_dict_encoding      (String        type);
 
 private:
     void          get_reading_substr     (WideString   &string,

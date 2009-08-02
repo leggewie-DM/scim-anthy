@@ -43,14 +43,17 @@ NicolaConvertor::~NicolaConvertor ()
 }
 
 bool
-NicolaConvertor::can_append (const KeyEvent & key)
+NicolaConvertor::can_append (const KeyEvent & key,
+                             bool             ignore_space)
 {
     if (key == m_through_key_event) {
         m_through_key_event = KeyEvent ();
         return false;
     }
 
-    if (m_processing_timeout && !m_prev_thumb_key.empty()) {
+    if (m_processing_timeout &&
+        m_prev_char_key.empty () && !m_prev_thumb_key.empty())
+    {
         emit_key_event (m_prev_thumb_key);
         m_prev_thumb_key = KeyEvent ();
         return false;
@@ -82,7 +85,7 @@ NicolaConvertor::can_append (const KeyEvent & key)
     }
 
     if (isprint (key.get_ascii_code ()) &&
-        !isspace (key.get_ascii_code ()))
+        (ignore_space || !isspace (key.get_ascii_code ())))
     {
         return true;
     }
@@ -523,9 +526,16 @@ NicolaConvertor::append (const KeyEvent & key,
     }
 
     if (m_processing_timeout) {
-        search (m_prev_char_key, SCIM_ANTHY_NICOLA_SHIFT_NONE,
+        search (m_prev_char_key,
+                get_thumb_key_type (m_prev_thumb_key),
                 result, raw);
-        m_prev_char_key = KeyEvent ();
+        if (m_prev_thumb_key.empty ()) {
+            m_prev_char_key  = KeyEvent ();
+            m_prev_thumb_key = KeyEvent ();
+        } else {
+            m_repeat_char_key  = m_prev_char_key;
+            m_repeat_thumb_key = m_prev_thumb_key;
+        }
         return handle_voiced_consonant (result, pending);
     }
 
@@ -572,6 +582,17 @@ NicolaConvertor::append (const KeyEvent & key,
     }
 
     return handle_voiced_consonant (result, pending);
+}
+
+bool
+NicolaConvertor::append (const String & str,
+                         WideString   & result,
+                         WideString   & pending)
+{
+    result = utf8_mbstowcs (str);
+    m_pending = WideString ();
+
+    return false;
 }
 
 void

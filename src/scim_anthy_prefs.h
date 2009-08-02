@@ -26,14 +26,18 @@
 #define SCIM_ANTHY_CONFIG_TYPING_METHOD               "/IMEngine/Anthy/TypingMethod"
 #define SCIM_ANTHY_CONFIG_CONVERSION_MODE             "/IMEngine/Anthy/ConversionMode"
 #define SCIM_ANTHY_CONFIG_PERIOD_STYLE                "/IMEngine/Anthy/PeriodStyle"
+#define SCIM_ANTHY_CONFIG_SYMBOL_STYLE                "/IMEngine/Anthy/SymbolStyle"
 #define SCIM_ANTHY_CONFIG_SPACE_TYPE                  "/IMEngine/Anthy/SpaceType"
 #define SCIM_ANTHY_CONFIG_TEN_KEY_TYPE                "/IMEngine/Anthy/TenKeyType"
 #define SCIM_ANTHY_CONFIG_BEHAVIOR_ON_PERIOD          "/IMEngine/Anthy/BehaviorOnPeriod"
+#define SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT       "/IMEngine/Anthy/BehaviorOnFocusOut"
 
 #define SCIM_ANTHY_CONFIG_ROMAJI_THEME_FILE           "/IMEngine/Anthy/RomajiThemeFile"
 #define SCIM_ANTHY_CONFIG_ROMAJI_HALF_SYMBOL          "/IMEngine/Anthy/RomajiHalfSymbol"
 #define SCIM_ANTHY_CONFIG_ROMAJI_HALF_NUMBER          "/IMEngine/Anthy/RomajiHalfNumber"
 #define SCIM_ANTHY_CONFIG_ROMAJI_ALLOW_SPLIT          "/IMEngine/Anthy/RomajiAllowSplit"
+#define SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_MODE    "/IMEngine/Anthy/RomajiPseudoAsciiMode"
+#define SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_BLANK_BEHAVIOR    "/IMEngine/Anthy/RomajiPseudoAsciiBlankBehavior"
 
 #define SCIM_ANTHY_CONFIG_KANA_LAYOUT_FILE            "/IMEngine/Anthy/KanaLayoutFile"
 
@@ -45,6 +49,7 @@
 #define SCIM_ANTHY_CONFIG_LEARN_ON_MANUAL_COMMIT      "/IMEngine/Anthy/LearnOnManualCommit"
 #define SCIM_ANTHY_CONFIG_LEARN_ON_AUTO_COMMIT        "/IMEngine/Anthy/LearnOnAutoCommit"
 
+#define SCIM_ANTHY_CONFIG_DICT_ENCODING               "/IMEngine/Anthy/DictEncoding"
 #define SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND          "/IMEngine/Anthy/DictAdminCommand"
 #define SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND            "/IMEngine/Anthy/AddWordCommand"
 
@@ -62,6 +67,7 @@
 #define SCIM_ANTHY_CONFIG_SHOW_TYPING_METHOD_LABEL    "/IMEngine/Anthy/ShowTypingMethodLabel"
 #define SCIM_ANTHY_CONFIG_SHOW_CONVERSION_MODE_LABEL  "/IMEngine/Anthy/ShowConversionModeLabel"
 #define SCIM_ANTHY_CONFIG_SHOW_PERIOD_STYLE_LABEL     "/IMEngine/Anthy/ShowPeriodStyleLabel"
+#define SCIM_ANTHY_CONFIG_SHOW_SYMBOL_STYLE_LABEL     "/IMEngine/Anthy/ShowSymbolStyleLabel"
 #define SCIM_ANTHY_CONFIG_SHOW_DICT_LABEL             "/IMEngine/Anthy/ShowDictLabel"
 #define SCIM_ANTHY_CONFIG_SHOW_DICT_ADMIN_LABEL       "/IMEngine/Anthy/ShowDictAdminLabel"
 #define SCIM_ANTHY_CONFIG_SHOW_ADD_WORD_LABEL         "/IMEngine/Anthy/ShowAddWordLabel"
@@ -78,6 +84,7 @@
 #define SCIM_ANTHY_CONFIG_HIRAGANA_MODE_KEY           "/IMEngine/Anthy/HiraganaModeKey"
 #define SCIM_ANTHY_CONFIG_KATAKANA_MODE_KEY           "/IMEngine/Anthy/KatakanaModeKey"
 #define SCIM_ANTHY_CONFIG_HALF_KATAKANA_MODE_KEY      "/IMEngine/Anthy/HalfKatakanaModeKey"
+#define SCIM_ANTHY_CONFIG_CANCEL_PSEUDO_ASCII_MODE_KEY  "/IMEngine/Anthy/CancelPseudoAsciiModeKey"
 
 #define SCIM_ANTHY_CONFIG_INSERT_SPACE_KEY            "/IMEngine/Anthy/InsertSpaceKey"
 #define SCIM_ANTHY_CONFIG_INSERT_ALT_SPACE_KEY        "/IMEngine/Anthy/InsertAltSpaceKey"
@@ -132,8 +139,8 @@
 #define SCIM_ANTHY_CONFIG_CONV_TO_KATAKANA_KEY        "/IMEngine/Anthy/ConvertToKatakanaKey"
 #define SCIM_ANTHY_CONFIG_CONV_TO_HALF_KEY            "/IMEngine/Anthy/ConvertToHalfKey"
 #define SCIM_ANTHY_CONFIG_CONV_TO_HALF_KATAKANA_KEY   "/IMEngine/Anthy/ConvertToHalfKatakanaKey"
-#define SCIM_ANTHY_CONFIG_CONV_TO_LATIN_KEY           "/IMEngine/Anthy/ConvertToLatinKey"
 #define SCIM_ANTHY_CONFIG_CONV_TO_WIDE_LATIN_KEY      "/IMEngine/Anthy/ConvertToWideLatinKey"
+#define SCIM_ANTHY_CONFIG_CONV_TO_LATIN_KEY           "/IMEngine/Anthy/ConvertToLatinKey"
 
 #define SCIM_ANTHY_CONFIG_RECONVERT_KEY               "/IMEngine/Anthy/ReconvertKey"
 
@@ -156,14 +163,18 @@
 #define SCIM_ANTHY_CONFIG_TYPING_METHOD_DEFAULT               "Romaji"
 #define SCIM_ANTHY_CONFIG_CONVERSION_MODE_DEFAULT             "MultiSeg"
 #define SCIM_ANTHY_CONFIG_PERIOD_STYLE_DEFAULT                "Japanese"
+#define SCIM_ANTHY_CONFIG_SYMBOL_STYLE_DEFAULT                "Japanese"
 #define SCIM_ANTHY_CONFIG_SPACE_TYPE_DEFAULT                  "FollowMode"
 #define SCIM_ANTHY_CONFIG_TEN_KEY_TYPE_DEFAULT                "FollowMode"
 #define SCIM_ANTHY_CONFIG_BEHAVIOR_ON_PERIOD_DEFAULT          "None"
+#define SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT_DEFAULT       "Commit"
 
 #define SCIM_ANTHY_CONFIG_ROMAJI_THEME_FILE_DEFAULT           ""
 #define SCIM_ANTHY_CONFIG_ROMAJI_HALF_SYMBOL_DEFAULT          false
 #define SCIM_ANTHY_CONFIG_ROMAJI_HALF_NUMBER_DEFAULT          false
 #define SCIM_ANTHY_CONFIG_ROMAJI_ALLOW_SPLIT_DEFAULT          true
+#define SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_MODE_DEFAULT    true
+#define SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_BLANK_BEHAVIOR_DEFAULT    true
 
 #define SCIM_ANTHY_CONFIG_KANA_LAYOUT_FILE_DEFAULT            ""
 
@@ -175,6 +186,7 @@
 #define SCIM_ANTHY_CONFIG_LEARN_ON_MANUAL_COMMIT_DEFAULT      true
 #define SCIM_ANTHY_CONFIG_LEARN_ON_AUTO_COMMIT_DEFAULT        true
 
+#define SCIM_ANTHY_CONFIG_DICT_ENCODING_DEFAULT               "EUC-JP"
 #define SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND_DEFAULT          "kasumi"
 #define SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND_DEFAULT            "kasumi --add"
 
@@ -192,6 +204,7 @@
 #define SCIM_ANTHY_CONFIG_SHOW_TYPING_METHOD_LABEL_DEFAULT    false
 #define SCIM_ANTHY_CONFIG_SHOW_CONVERSION_MODE_LABEL_DEFAULT  true
 #define SCIM_ANTHY_CONFIG_SHOW_PERIOD_STYLE_LABEL_DEFAULT     false
+#define SCIM_ANTHY_CONFIG_SHOW_SYMBOL_STYLE_LABEL_DEFAULT     false
 #define SCIM_ANTHY_CONFIG_SHOW_DICT_LABEL_DEFAULT             true
 #define SCIM_ANTHY_CONFIG_SHOW_DICT_ADMIN_LABEL_DEFAULT       true
 #define SCIM_ANTHY_CONFIG_SHOW_ADD_WORD_LABEL_DEFAULT         true
@@ -208,6 +221,7 @@
 #define SCIM_ANTHY_CONFIG_HIRAGANA_MODE_KEY_DEFAULT           ""
 #define SCIM_ANTHY_CONFIG_KATAKANA_MODE_KEY_DEFAULT           ""
 #define SCIM_ANTHY_CONFIG_HALF_KATAKANA_MODE_KEY_DEFAULT      ""
+#define SCIM_ANTHY_CONFIG_CANCEL_PSEUDO_ASCII_MODE_KEY_DEFAULT "Escape"
 
 #define SCIM_ANTHY_CONFIG_INSERT_SPACE_KEY_DEFAULT            "space"
 #define SCIM_ANTHY_CONFIG_INSERT_ALT_SPACE_KEY_DEFAULT        "Shift+space"
@@ -262,8 +276,8 @@
 #define SCIM_ANTHY_CONFIG_CONV_TO_KATAKANA_KEY_DEFAULT        "F7"
 #define SCIM_ANTHY_CONFIG_CONV_TO_HALF_KEY_DEFAULT            "F8"
 #define SCIM_ANTHY_CONFIG_CONV_TO_HALF_KATAKANA_KEY_DEFAULT   "Shift+F8"
-#define SCIM_ANTHY_CONFIG_CONV_TO_LATIN_KEY_DEFAULT           "F10"
 #define SCIM_ANTHY_CONFIG_CONV_TO_WIDE_LATIN_KEY_DEFAULT      "F9"
+#define SCIM_ANTHY_CONFIG_CONV_TO_LATIN_KEY_DEFAULT           "F10"
 
 #define SCIM_ANTHY_CONFIG_RECONVERT_KEY_DEFAULT               "Shift+Henkan"
 
@@ -348,15 +362,20 @@ struct ColorConfigData
 extern BoolConfigData   config_bool_common [];
 extern IntConfigData    config_int_common [];
 extern StringConfigData config_string_common [];
+extern StringConfigData config_keyboards_mode [];
 extern StringConfigData config_keyboards_edit [];
 extern StringConfigData config_keyboards_caret [];
 extern StringConfigData config_keyboards_segments [];
 extern StringConfigData config_keyboards_candidates [];
 extern StringConfigData config_keyboards_direct_select [];
 extern StringConfigData config_keyboards_converting [];
-extern StringConfigData config_keyboards_mode [];
 extern StringConfigData config_keyboards_dict [];
 extern ColorConfigData  config_color_common [];
+
+BoolConfigData   *find_bool_config_entry   (const char *config_key);
+IntConfigData    *find_int_config_entry    (const char *config_key);
+StringConfigData *find_string_config_entry (const char *config_key);
+ColorConfigData  *find_color_config_entry  (const char *config_key);
 
 }
 

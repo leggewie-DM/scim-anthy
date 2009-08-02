@@ -184,6 +184,7 @@ public:
     bool   action_hiragana_mode               (void);
     bool   action_katakana_mode               (void);
     bool   action_half_katakana_mode          (void);
+    bool   action_cancel_pseudo_ascii_mode    (void);
 
     bool   action_add_word                    (void);
     bool   action_launch_dict_admin_tool      (void);
@@ -203,6 +204,7 @@ public:
                                                void         *data = NULL,
                                                delete_func   delete_fn = NULL);
     void   timeout_remove                     (uint32        id);
+    int    get_pseudo_ascii_mode              (void);
 
 private:
     /* processing key event */
@@ -221,6 +223,8 @@ private:
     void   set_typing_method                  (TypingMethod   method);
     void   set_period_style                   (PeriodStyle    period,
                                                CommaStyle     comma);
+    void   set_symbol_style                   (BracketStyle   bracket,
+                                               SlashStyle     slash);
     bool   is_selecting_candidates            (void);
     void   select_candidate_no_direct         (unsigned int   item);
     bool   convert_kana                       (CandidateType  type);
@@ -256,6 +260,9 @@ private:
 
     /*  */
     ConversionMode        m_conv_mode;
+
+    /* for action */
+    KeyEvent              m_last_key;
 
     /* Helper */
     bool                  m_helper_started;

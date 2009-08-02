@@ -91,9 +91,7 @@ Conversion::Conversion (AnthyInstance &anthy, Reading &reading)
     anthy_context_set_encoding (m_anthy_context, ANTHY_EUC_JP_ENCODING);
 #endif /* HAS_ANTHY_CONTEXT_SET_ENCODING */
 
-    if (!m_iconv.set_encoding ("EUC-JP")) {
-        // error
-    }
+    set_dict_encoding (String ("EUC-JP"));
 }
 
 Conversion::~Conversion ()
@@ -137,7 +135,7 @@ Conversion::convert (WideString source, CandidateType ctype,
     m_cur_segment = 0;
 
     // create segments
-    m_segments.clear ();
+    m_segments.clear();
     for (int i = m_start_id; i < conv_stat.nr_segment; i++) {
         struct anthy_segment_stat seg_stat;
         anthy_get_segment_stat (m_anthy_context, i, &seg_stat);
@@ -180,15 +178,46 @@ Conversion::predict (void)
 }
 
 void
-Conversion::clear (void)
+Conversion::clear (int segment_id)
 {
-    anthy_reset_context (m_anthy_context);
+    if (segment_id < 0 || m_segments.size () <= 0 ||
+        segment_id >= (int) m_segments.size () - 1)
+    {
+        // complete clear
 
-    m_segments.clear ();
+        anthy_reset_context (m_anthy_context);
 
-    m_start_id    = 0;
-    m_cur_segment = -1;
-    m_predicting  = false;
+        m_segments.clear ();
+
+        m_start_id    = 0;
+        m_cur_segment = -1;
+        m_predicting  = false;
+
+    } else {
+        // partial clear
+
+        // remove stored segments
+        ConversionSegments::iterator it = m_segments.begin ();
+        m_segments.erase (it, it + segment_id + 1);
+
+        // adjust selected segment
+        int new_start_segment_id = m_start_id + segment_id + 1;
+        if (m_cur_segment >= 0) {
+            m_cur_segment -= new_start_segment_id - m_start_id;
+            if (m_cur_segment < 0)
+                m_cur_segment = 0;
+        }
+
+        // adjust offset
+        unsigned int clear_len = 0;
+        for (int i = m_start_id; i < new_start_segment_id; i++) {
+            struct anthy_segment_stat seg_stat;
+            anthy_get_segment_stat (m_anthy_context, i, &seg_stat);
+            clear_len += seg_stat.seg_len;
+        }
+        m_reading.erase (0, clear_len, true);
+        m_start_id = new_start_segment_id;
+    }
 }
 
 void
@@ -208,38 +237,7 @@ Conversion::commit (int segment_id, bool learn)
                                   m_segments[i].get_candidate_id ());
     }
 
-
-    if (segment_id >= 0 &&
-        segment_id + 1 < (int) m_segments.size ())
-    {
-        // partial commit
-
-        // remove commited segments
-        ConversionSegments::iterator it = m_segments.begin ();
-        m_segments.erase (it, it + segment_id + 1);
-
-        // adjust selected segment
-        int new_start_segment_id = m_start_id + segment_id + 1;
-        if (m_cur_segment >= 0) {
-            m_cur_segment -= new_start_segment_id - m_start_id;
-            if (m_cur_segment < 0)
-                m_cur_segment = 0;
-        }
-
-        // adjust offset
-        unsigned int commited_len = 0;
-        for (int i = m_start_id; i < new_start_segment_id; i++) {
-            struct anthy_segment_stat seg_stat;
-            anthy_get_segment_stat (m_anthy_context, i, &seg_stat);
-            commited_len += seg_stat.seg_len;
-        }
-        m_reading.erase (0, commited_len, true);
-        m_start_id = new_start_segment_id;
-
-    } else {
-        // commit all
-        clear ();
-    }
+    clear (segment_id);
 }
 
 
@@ -487,7 +485,7 @@ Conversion::resize_segment (int relative_size, int segment_id)
         struct anthy_segment_stat seg_stat;
         anthy_get_segment_stat (m_anthy_context, i, &seg_stat);
         m_segments.push_back (
-            ConversionSegment (get_segment_string (i, 0), 0,
+            ConversionSegment (get_segment_string (i - m_start_id, 0), 0,
                                seg_stat.seg_len));
     }
 }
@@ -702,6 +700,21 @@ Conversion::select_candidate (int candidate_id, int segment_id)
                                                             candidate_id),
                                         candidate_id);
         }
+    }
+}
+
+
+
+//
+// preferences
+//
+bool
+Conversion::set_dict_encoding (String type)
+{
+    if (m_iconv.set_encoding (type.c_str ())) {
+        return true;
+    } else {
+        return m_iconv.set_encoding ("EUC-JP");
     }
 }
 

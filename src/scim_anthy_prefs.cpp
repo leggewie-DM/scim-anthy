@@ -97,6 +97,24 @@ BoolConfigData config_bool_common [] =
         false,
     },
     {
+        SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_MODE,
+        SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_MODE_DEFAULT,
+        SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_MODE_DEFAULT,
+        N_("_Entering the pseudo ASCII input mode with capital letters."),
+        NULL,
+        N_("If this check is enabled, capital letters will becomes a trigger to enter the pseudo ASCII input mode."),
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_BLANK_BEHAVIOR,
+        SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_BLANK_BEHAVIOR_DEFAULT,
+        SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_BLANK_BEHAVIOR_DEFAULT,
+        N_("Insert a _blank with a blank key."),
+        NULL,
+        N_("If this check is enabled, a blank key will works to insert a blank when entering the pseudo ASCII input mode."),
+        false,
+    },
+    {
         SCIM_ANTHY_CONFIG_PREDICT_ON_INPUT,
         SCIM_ANTHY_CONFIG_PREDICT_ON_INPUT_DEFAULT,
         SCIM_ANTHY_CONFIG_PREDICT_ON_INPUT_DEFAULT,
@@ -149,6 +167,16 @@ BoolConfigData config_bool_common [] =
         SCIM_ANTHY_CONFIG_SHOW_PERIOD_STYLE_LABEL_DEFAULT,
         SCIM_ANTHY_CONFIG_SHOW_PERIOD_STYLE_LABEL_DEFAULT,
         N_("Show _period style label"),
+        NULL,
+        NULL,
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_SHOW_SYMBOL_STYLE_LABEL,
+        SCIM_ANTHY_CONFIG_SHOW_SYMBOL_STYLE_LABEL_DEFAULT,
+        SCIM_ANTHY_CONFIG_SHOW_SYMBOL_STYLE_LABEL_DEFAULT,
+        N_("Show _symbol style label"),
         NULL,
         NULL,
         NULL,
@@ -291,6 +319,16 @@ StringConfigData config_string_common [] =
         false,
     },
     {
+        SCIM_ANTHY_CONFIG_SYMBOL_STYLE,
+        SCIM_ANTHY_CONFIG_SYMBOL_STYLE_DEFAULT,
+        SCIM_ANTHY_CONFIG_SYMBOL_STYLE_DEFAULT,
+        N_("Symb_ol input style: "),
+        NULL,
+        NULL,
+        NULL,
+        false,
+    },
+    {
         SCIM_ANTHY_CONFIG_SPACE_TYPE,
         SCIM_ANTHY_CONFIG_SPACE_TYPE_DEFAULT,
         SCIM_ANTHY_CONFIG_SPACE_TYPE_DEFAULT,
@@ -315,6 +353,16 @@ StringConfigData config_string_common [] =
         SCIM_ANTHY_CONFIG_BEHAVIOR_ON_PERIOD_DEFAULT,
         SCIM_ANTHY_CONFIG_BEHAVIOR_ON_PERIOD_DEFAULT,
         N_("_Behavior on a comma or a period:"),
+        NULL,
+        NULL,
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT,
+        SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT_DEFAULT,
+        SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT_DEFAULT,
+        N_("_Behavior on focus out:"),
         NULL,
         NULL,
         NULL,
@@ -374,6 +422,19 @@ StringConfigData config_string_common [] =
         false,
     },
     {
+        SCIM_ANTHY_CONFIG_DICT_ENCODING,
+        SCIM_ANTHY_CONFIG_DICT_ENCODING_DEFAULT,
+        SCIM_ANTHY_CONFIG_DICT_ENCODING_DEFAULT,
+        N_("En_coding of dictionary:"),
+        NULL,
+        N_("If you choose \"EUC-JP-MS\", interoperatability of documents "
+           "created on this system with Microsoft Windows may improve, "
+           "but it depends on the implementation of your operating system "
+           "and actual encoding of your dictionary."),
+        NULL,
+        false,
+    },
+    {
         SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND,
         SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND_DEFAULT,
         SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND_DEFAULT,
@@ -420,6 +481,120 @@ StringConfigData config_string_common [] =
         N_("_Selected segment:"),
         NULL,
         NULL,
+        NULL,
+        false,
+    },
+    {
+        NULL,
+        "",
+        "",
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        false,
+    },
+};
+
+StringConfigData config_keyboards_mode [] =
+{
+    {
+        SCIM_ANTHY_CONFIG_ON_OFF_KEY,
+        SCIM_ANTHY_CONFIG_ON_OFF_KEY_DEFAULT,
+        SCIM_ANTHY_CONFIG_ON_OFF_KEY_DEFAULT,
+        N_("Toggle on/off"),
+        N_("Select toggle on/off keys"),
+        N_("The key events to toggle on/off Japanese mode. "),
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_CIRCLE_INPUT_MODE_KEY,
+        SCIM_ANTHY_CONFIG_CIRCLE_INPUT_MODE_KEY_DEFAULT,
+        SCIM_ANTHY_CONFIG_CIRCLE_INPUT_MODE_KEY_DEFAULT,
+        N_("Circle input mode"),
+        N_("Select circle input mode keys"),
+        N_("The key events to circle input mode. "),
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_CIRCLE_KANA_MODE_KEY,
+        SCIM_ANTHY_CONFIG_CIRCLE_KANA_MODE_KEY_DEFAULT,
+        SCIM_ANTHY_CONFIG_CIRCLE_KANA_MODE_KEY_DEFAULT,
+        N_("Circle kana mode"),
+        N_("Select circle kana mode keys"),
+        N_("The key events to circle kana mode. "),
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_LATIN_MODE_KEY,
+        SCIM_ANTHY_CONFIG_LATIN_MODE_KEY_DEFAULT,
+        SCIM_ANTHY_CONFIG_LATIN_MODE_KEY_DEFAULT,
+        N_("Latin mode"),
+        N_("Select Latin mode keys"),
+        N_("The key events to switch input mode to Latin. "),
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_WIDE_LATIN_MODE_KEY,
+        SCIM_ANTHY_CONFIG_WIDE_LATIN_MODE_KEY_DEFAULT,
+        SCIM_ANTHY_CONFIG_WIDE_LATIN_MODE_KEY_DEFAULT,
+        N_("Wide Latin mode"),
+        N_("Select wide Latin mode keys"),
+        N_("The key events to switch input mode to wide Latin. "),
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_HIRAGANA_MODE_KEY,
+        SCIM_ANTHY_CONFIG_HIRAGANA_MODE_KEY_DEFAULT,
+        SCIM_ANTHY_CONFIG_HIRAGANA_MODE_KEY_DEFAULT,
+        N_("Hiragana mode"),
+        N_("Select hiragana mode keys"),
+        N_("The key events to switch input mode to hiragana. "),
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_KATAKANA_MODE_KEY,
+        SCIM_ANTHY_CONFIG_KATAKANA_MODE_KEY_DEFAULT,
+        SCIM_ANTHY_CONFIG_KATAKANA_MODE_KEY_DEFAULT,
+        N_("Katakana mode"),
+        N_("Select katakana mode keys"),
+        N_("The key events to switch input mode to katakana. "),
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_HALF_KATAKANA_MODE_KEY,
+        SCIM_ANTHY_CONFIG_HALF_KATAKANA_MODE_KEY_DEFAULT,
+        SCIM_ANTHY_CONFIG_HALF_KATAKANA_MODE_KEY_DEFAULT,
+        N_("Half katakana mode"),
+        N_("Select half katakana mode keys"),
+        N_("The key events to switch input mode to half katakana. "),
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_CANCEL_PSEUDO_ASCII_MODE_KEY,
+        SCIM_ANTHY_CONFIG_CANCEL_PSEUDO_ASCII_MODE_KEY_DEFAULT,
+        SCIM_ANTHY_CONFIG_CANCEL_PSEUDO_ASCII_MODE_KEY_DEFAULT,
+        N_("Pseudo ASCII mode cancel"),
+        N_("Select pseudo ASCII mode cancel key"),
+        N_("The key events to cancel the pseudo ASCII mode."),
+        NULL,
+        false,
+    },
+    {
+        SCIM_ANTHY_CONFIG_CIRCLE_TYPING_METHOD_KEY,
+        SCIM_ANTHY_CONFIG_CIRCLE_TYPING_METHOD_KEY_DEFAULT,
+        SCIM_ANTHY_CONFIG_CIRCLE_TYPING_METHOD_KEY_DEFAULT,
+        N_("Circle typing method"),
+        N_("Select circle typing method keys"),
+        N_("The key events to circle typing method. "),
         NULL,
         false,
     },
@@ -1010,110 +1185,6 @@ StringConfigData config_keyboards_converting [] =
     },
 };
 
-StringConfigData config_keyboards_mode [] =
-{
-    {
-        SCIM_ANTHY_CONFIG_ON_OFF_KEY,
-        SCIM_ANTHY_CONFIG_ON_OFF_KEY_DEFAULT,
-        SCIM_ANTHY_CONFIG_ON_OFF_KEY_DEFAULT,
-        N_("Toggle on/off"),
-        N_("Select toggle on/off keys"),
-        N_("The key events to toggle on/off Japanese mode. "),
-        NULL,
-        false,
-    },
-    {
-        SCIM_ANTHY_CONFIG_CIRCLE_INPUT_MODE_KEY,
-        SCIM_ANTHY_CONFIG_CIRCLE_INPUT_MODE_KEY_DEFAULT,
-        SCIM_ANTHY_CONFIG_CIRCLE_INPUT_MODE_KEY_DEFAULT,
-        N_("Circle input mode"),
-        N_("Select circle input mode keys"),
-        N_("The key events to circle input mode. "),
-        NULL,
-        false,
-    },
-    {
-        SCIM_ANTHY_CONFIG_CIRCLE_KANA_MODE_KEY,
-        SCIM_ANTHY_CONFIG_CIRCLE_KANA_MODE_KEY_DEFAULT,
-        SCIM_ANTHY_CONFIG_CIRCLE_KANA_MODE_KEY_DEFAULT,
-        N_("Circle kana mode"),
-        N_("Select circle kana mode keys"),
-        N_("The key events to circle kana mode. "),
-        NULL,
-        false,
-    },
-    {
-        SCIM_ANTHY_CONFIG_LATIN_MODE_KEY,
-        SCIM_ANTHY_CONFIG_LATIN_MODE_KEY_DEFAULT,
-        SCIM_ANTHY_CONFIG_LATIN_MODE_KEY_DEFAULT,
-        N_("Latin mode"),
-        N_("Select Latin mode keys"),
-        N_("The key events to switch input mode to Latin. "),
-        NULL,
-        false,
-    },
-    {
-        SCIM_ANTHY_CONFIG_WIDE_LATIN_MODE_KEY,
-        SCIM_ANTHY_CONFIG_WIDE_LATIN_MODE_KEY_DEFAULT,
-        SCIM_ANTHY_CONFIG_WIDE_LATIN_MODE_KEY_DEFAULT,
-        N_("Wide Latin mode"),
-        N_("Select wide Latin mode keys"),
-        N_("The key events to switch input mode to wide Latin. "),
-        NULL,
-        false,
-    },
-    {
-        SCIM_ANTHY_CONFIG_HIRAGANA_MODE_KEY,
-        SCIM_ANTHY_CONFIG_HIRAGANA_MODE_KEY_DEFAULT,
-        SCIM_ANTHY_CONFIG_HIRAGANA_MODE_KEY_DEFAULT,
-        N_("Hiragana mode"),
-        N_("Select hiragana mode keys"),
-        N_("The key events to switch input mode to hiragana. "),
-        NULL,
-        false,
-    },
-    {
-        SCIM_ANTHY_CONFIG_KATAKANA_MODE_KEY,
-        SCIM_ANTHY_CONFIG_KATAKANA_MODE_KEY_DEFAULT,
-        SCIM_ANTHY_CONFIG_KATAKANA_MODE_KEY_DEFAULT,
-        N_("Katakana mode"),
-        N_("Select katakana mode keys"),
-        N_("The key events to switch input mode to katakana. "),
-        NULL,
-        false,
-    },
-    {
-        SCIM_ANTHY_CONFIG_HALF_KATAKANA_MODE_KEY,
-        SCIM_ANTHY_CONFIG_HALF_KATAKANA_MODE_KEY_DEFAULT,
-        SCIM_ANTHY_CONFIG_HALF_KATAKANA_MODE_KEY_DEFAULT,
-        N_("Half katakana mode"),
-        N_("Select half katakana mode keys"),
-        N_("The key events to switch input mode to half katakana. "),
-        NULL,
-        false,
-    },
-    {
-        SCIM_ANTHY_CONFIG_CIRCLE_TYPING_METHOD_KEY,
-        SCIM_ANTHY_CONFIG_CIRCLE_TYPING_METHOD_KEY_DEFAULT,
-        SCIM_ANTHY_CONFIG_CIRCLE_TYPING_METHOD_KEY_DEFAULT,
-        N_("Circle typing method"),
-        N_("Select circle typing method keys"),
-        N_("The key events to circle typing method. "),
-        NULL,
-        false,
-    },
-    {
-        NULL,
-        "",
-        "",
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        false,
-    },
-};
-
 StringConfigData config_keyboards_dict [] =
 {
     {
@@ -1203,4 +1274,65 @@ ColorConfigData config_color_common [] =
         false,
     },
 };
+
+BoolConfigData *
+find_bool_config_entry (const char *config_key)
+{
+    if (!config_key)
+        return NULL;
+
+    for (unsigned int i = 0; config_bool_common[i].key; i++) {
+        BoolConfigData *entry = &config_bool_common[i];
+        if (entry->key && !strcmp (entry->key, config_key))
+            return entry;
+    }
+
+    return NULL;
+}
+
+IntConfigData *
+find_int_config_entry (const char *config_key)
+{
+    if (!config_key)
+        return NULL;
+
+    for (unsigned int i = 0; config_int_common[i].key; i++) {
+        IntConfigData *entry = &config_int_common[i];
+        if (entry->key && !strcmp (entry->key, config_key))
+            return entry;
+    }
+
+    return NULL;
+}
+
+StringConfigData *
+find_string_config_entry (const char *config_key)
+{
+    if (!config_key)
+        return NULL;
+
+    for (unsigned int i = 0; config_string_common[i].key; i++) {
+        StringConfigData *entry = &config_string_common[i];
+        if (entry->key && !strcmp (entry->key, config_key))
+            return entry;
+    }
+
+    return NULL;
+}
+
+ColorConfigData *
+find_color_config_entry (const char *config_key)
+{
+    if (!config_key)
+        return NULL;
+
+    for (unsigned int i = 0; config_color_common[i].fg_key; i++) {
+        ColorConfigData *entry = &config_color_common[i];
+        if (entry->fg_key && !strcmp (entry->fg_key, config_key))
+            return entry;
+    }
+
+    return NULL;
+}
+
 }

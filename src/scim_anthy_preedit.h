@@ -29,6 +29,9 @@
 #include "scim_anthy_reading.h"
 #include "scim_anthy_conversion.h"
 
+#define SCIM_ANTHY_PSEUDO_ASCII_TRIGGERED_CAPITALIZED			(1 << 0)
+#define SCIM_ANTHY_PSEUDO_ASCII_TRIGGERED_COUPLE_OF_CAPITAL		(1 << 1)
+
 using namespace scim;
 
 class AnthyInstance;
@@ -60,14 +63,16 @@ public:
     virtual bool          is_predicting          (void);
     virtual bool          is_reconverting        (void);
 
-    // manipulating the preedit string
+    // for handling the preedit string
     virtual bool          can_process_key_event  (const KeyEvent & key);
     // return true if commiting is needed.
     virtual bool          process_key_event      (const KeyEvent & key);
+    virtual bool          append                 (const KeyEvent & key,
+                                                  const String   & string);
     virtual void          erase                  (bool backward = true);
     virtual void          finish                 (void);
 
-    // manipulating the conversion string
+    // for handling the conversion string
     virtual void          convert                (CandidateType type
                                                   = SCIM_ANTHY_CANDIDATE_DEFAULT,
                                                   bool single_segment = false);
@@ -76,6 +81,9 @@ public:
     virtual void          revert                 (void);
     virtual void          commit                 (int  segment_id = -1,
                                                   bool lean       = true);
+
+    // for prediction
+    virtual void          predict                (void);
 
     // segments of the converted sentence
     virtual int           get_nr_segments        (void);
@@ -93,18 +101,15 @@ public:
     virtual void          select_candidate       (int candidate_id,
                                                   int segment_id = -1);
 
-    // manipulating the caret
+    // for handling the caret
     virtual unsigned int  get_caret_pos          (void);
     virtual void          set_caret_pos          (unsigned int   pos);
     virtual void          move_caret             (int            len);
 
-    // prediction
-    virtual void          predict                (void);
+    // clear all or part of the string.
+    virtual void          clear                  (int segment_id = -1);
 
-    // clear all string
-    virtual void          clear                  (void);
-
-    // preference
+    // preferences
     virtual void          set_input_mode         (InputMode      mode);
     virtual InputMode     get_input_mode         (void);
     virtual void          set_typing_method      (TypingMethod   method);
@@ -113,10 +118,18 @@ public:
     virtual PeriodStyle   get_period_style       (void);
     virtual void          set_comma_style        (CommaStyle     style);
     virtual CommaStyle    get_comma_style        (void);
+    virtual void          set_bracket_style      (BracketStyle   style);
+    virtual BracketStyle  get_bracket_style      (void);
+    virtual void          set_slash_style        (SlashStyle     style);
+    virtual SlashStyle    get_slash_style        (void);
     virtual void          set_symbol_width       (bool           half);
     virtual bool          get_symbol_width       (void);
     virtual void          set_number_width       (bool           half);
     virtual bool          get_number_width       (void);
+    virtual void          set_pseudo_ascii_mode  (int            mode);
+    virtual bool          is_pseudo_ascii_mode   (void);
+    virtual void          reset_pseudo_ascii_mode(void);
+    virtual void          set_dict_encoding      (String         type);
 
 private:
     void                  get_reading_substr     (WideString   & substr,

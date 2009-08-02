@@ -18,7 +18,7 @@ scim-anthy provides some usefull user interfaces for Anthy using SCIM.
 
 2.1 Necessary
 
-  * scim-1.0.0 or later.
+  * scim-1.2.0 or later.
     - http://www.scim-im.org/
 
   * Anthy-5100 or later.
@@ -46,6 +46,10 @@ scim-anthy provides some usefull user interfaces for Anthy using SCIM.
   this:
 
     $ PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure
+
+  You'll find distribution-specific installation method from following site:
+
+    http://home.nyc.rr.com/computertaijutsu/jpninpt.html
 
 
 4. Usage
@@ -88,6 +92,9 @@ Special thanks to all scim-anthy developers and users!
  * Takuro Ashie <ashie at homa.ne.jp>
    - Developer.
 
+ * SHIMODA Hiroshi <piro@p.club.ne.jp>
+   - Art work.
+
  * James Su <james.su at gmail.com>
    - Anthor of scim
 
@@ -100,7 +107,7 @@ Special thanks to all scim-anthy developers and users!
  * UTUMI Hirosi <utuhiro78 at yahoo.co.jp>
    - Packager of RPM package for Mandriva.
 
- * Ryo DAIRIKI <ryo-dairiki at mbm.nifty.com>
+ * Ryo DAIRIKI <ryo-dairiki at users.sourceforge.jp>
    - Packager of RPM package for Fedora Core.
 
  * Mike Fabian <mfabian at suse.de>
