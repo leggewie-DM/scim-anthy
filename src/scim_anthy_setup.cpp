@@ -233,19 +233,28 @@ static ComboConfigCandidate period_styles[] =
     {NULL, NULL},
 };
 
+static ComboConfigCandidate symbol_styles[] =
+{
+    {"\xE3\x80\x8C\xE3\x80\x8D\xE3\x83\xBB", "Japanese"},
+    {"\xE3\x80\x8C\xE3\x80\x8D\xEF\xBC\x8F", "CornerBracket_WideSlash"},
+    {"\xEF\xBC\xBB\xEF\xBC\xBD\xE3\x83\xBB", "WideBracket_MiddleDot"},
+    {"\xEF\xBC\xBB\xEF\xBC\xBD\xEF\xBC\x8F", "WideBracket_WideSlash"},
+    {NULL, NULL},
+};
+
 static ComboConfigCandidate space_types[] =
 {
+    {N_("Follow input mode"), "FollowMode"},
     {N_("Wide"),              "Wide"},
     {N_("Half"),              "Half"},
-    {N_("Follow input mode"), "FollowMode"},
     {NULL, NULL},
 };
 
 static ComboConfigCandidate ten_key_types[] =
 {
+    {N_("Follow input mode"), "FollowMode"},
     {N_("Wide"),              "Wide"},
     {N_("Half"),              "Half"},
-    {N_("Follow input mode"), "FollowMode"},
     {NULL, NULL},
 };
 
@@ -257,6 +266,19 @@ static ComboConfigCandidate behavior_on_period[] =
     {NULL, NULL},
 };
 
+static ComboConfigCandidate behavior_on_focus_out[] =
+{
+    {N_("Commit"), "Commit"},
+    {N_("Clear"),  "Clear"},
+    {NULL, NULL},
+};
+
+static ComboConfigCandidate dict_encoding[] =
+{
+    {N_("EUC-JP"),    "EUC-JP"},
+    {N_("EUC-JP-MS"), "EUC-JP-MS"},
+    {NULL, NULL},
+};
 
 static ComboConfigCandidate preedit_style[] =
 {
@@ -312,51 +334,6 @@ static void     on_color_button_changed           (ScimColorButton  *button,
                                                    gpointer          user_data);
 
 
-static BoolConfigData *
-find_bool_config_entry (const char *config_key)
-{
-    if (!config_key)
-        return NULL;
-
-    for (unsigned int i = 0; config_bool_common[i].key; i++) {
-        BoolConfigData *entry = &config_bool_common[i];
-        if (entry->key && !strcmp (entry->key, config_key))
-            return entry;
-    }
-
-    return NULL;
-}
-
-static IntConfigData *
-find_int_config_entry (const char *config_key)
-{
-    if (!config_key)
-        return NULL;
-
-    for (unsigned int i = 0; config_int_common[i].key; i++) {
-        IntConfigData *entry = &config_int_common[i];
-        if (entry->key && !strcmp (entry->key, config_key))
-            return entry;
-    }
-
-    return NULL;
-}
-
-static StringConfigData *
-find_string_config_entry (const char *config_key)
-{
-    if (!config_key)
-        return NULL;
-
-    for (unsigned int i = 0; config_string_common[i].key; i++) {
-        StringConfigData *entry = &config_string_common[i];
-        if (entry->key && !strcmp (entry->key, config_key))
-            return entry;
-    }
-
-    return NULL;
-}
-
 static StringConfigData *
 find_key_config_entry (const char *config_key)
 {
@@ -366,21 +343,6 @@ find_key_config_entry (const char *config_key)
             if (entry->key && !strcmp (entry->key, config_key))
                 return entry;
         }
-    }
-
-    return NULL;
-}
-
-static ColorConfigData *
-find_color_config_entry (const char *config_key)
-{
-    if (!config_key)
-        return NULL;
-
-    for (unsigned int i = 0; config_color_common[i].fg_key; i++) {
-        ColorConfigData *entry = &config_color_common[i];
-        if (entry->fg_key && !strcmp (entry->fg_key, config_key))
-            return entry;
     }
 
     return NULL;
@@ -539,7 +501,8 @@ create_combo (const char *config_key, gpointer candidates_p,
     if (!__widget_tooltips)
         __widget_tooltips = gtk_tooltips_new();
     if (entry->tooltip)
-        gtk_tooltips_set_tip (__widget_tooltips, GTK_WIDGET (entry->widget),
+        gtk_tooltips_set_tip (__widget_tooltips,
+                              GTK_WIDGET (GTK_COMBO (entry->widget)->entry),
                               _(entry->tooltip), NULL);
 
     return GTK_WIDGET (entry->widget);
@@ -756,7 +719,7 @@ create_common_page (void)
     vbox = gtk_vbox_new (FALSE, 0);
     gtk_widget_show (vbox);
 
-    table = gtk_table_new (6, 2, FALSE);
+    table = gtk_table_new (7, 2, FALSE);
     gtk_box_pack_start (GTK_BOX (vbox), table, FALSE, FALSE, 0);
     gtk_widget_show (table);
 
@@ -775,25 +738,50 @@ create_common_page (void)
                            (gpointer) &conversion_modes,
                            GTK_TABLE (table), 2);
 
+    /* behavior on focus out */
+    widget = create_combo (SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT,
+                           (gpointer) &behavior_on_focus_out,
+                           GTK_TABLE (table), 3);
+
+    return vbox;
+}
+
+static GtkWidget *
+create_symbols_page (void)
+{
+    GtkWidget *vbox, *table, *widget;
+
+    vbox = gtk_vbox_new (FALSE, 0);
+    gtk_widget_show (vbox);
+
+    table = gtk_table_new (7, 2, FALSE);
+    gtk_box_pack_start (GTK_BOX (vbox), table, FALSE, FALSE, 0);
+    gtk_widget_show (table);
+
     /* period style */
     widget = create_combo (SCIM_ANTHY_CONFIG_PERIOD_STYLE,
                            (gpointer) &period_styles,
                            GTK_TABLE (table), 3);
 
+    /* symbol style */
+    widget = create_combo (SCIM_ANTHY_CONFIG_SYMBOL_STYLE,
+                           (gpointer) &symbol_styles,
+                           GTK_TABLE (table), 4);
+
     /* space_style */
     widget = create_combo (SCIM_ANTHY_CONFIG_SPACE_TYPE,
                            (gpointer) &space_types,
-                           GTK_TABLE (table), 4);
+                           GTK_TABLE (table), 5);
 
     /* ten key_style */
     widget = create_combo (SCIM_ANTHY_CONFIG_TEN_KEY_TYPE,
                            (gpointer) &ten_key_types,
-                           GTK_TABLE (table), 5);
+                           GTK_TABLE (table), 6);
 
     /* behavior on period */
     widget = create_combo (SCIM_ANTHY_CONFIG_BEHAVIOR_ON_PERIOD,
                            (gpointer) &behavior_on_period,
-                           GTK_TABLE (table), 6);
+                           GTK_TABLE (table), 7);
 
     return vbox;
 }
@@ -883,24 +871,24 @@ create_keyboard_page (void)
     column = gtk_tree_view_column_new_with_attributes (_("Feature"), cell,
                                                        "text", COLUMN_LABEL,
                                                        NULL);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_fixed_width (column, 120);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
+    gtk_tree_view_column_set_fixed_width (column, 120);
+    gtk_tree_view_column_set_resizable(column, TRUE);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
     cell = gtk_cell_renderer_text_new ();
     column = gtk_tree_view_column_new_with_attributes (_("Key bindings"), cell,
                                                        "text", COLUMN_VALUE,
                                                        NULL);
-	gtk_tree_view_column_set_fixed_width (column, 200);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    gtk_tree_view_column_set_fixed_width (column, 200);
+    gtk_tree_view_column_set_resizable(column, TRUE);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
     cell = gtk_cell_renderer_text_new ();
     column = gtk_tree_view_column_new_with_attributes (_("Description"), cell,
                                                        "text", COLUMN_DESC,
                                                        NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
     GtkTreeSelection *selection;
     selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
@@ -1050,17 +1038,22 @@ create_dict_page (void)
     GtkWidget *table, *button;
     StringConfigData *entry;
 
-    table = gtk_table_new (2, 3, FALSE);
+    table = gtk_table_new (3, 3, FALSE);
     gtk_widget_show (table);
+
+    // encoding of dictionary
+    create_combo (SCIM_ANTHY_CONFIG_DICT_ENCODING,
+                  (gpointer) &dict_encoding,
+                  GTK_TABLE (table), 0);
 
     // dict admin command
     create_entry (SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND,
-                  GTK_TABLE (table), 0);
+                  GTK_TABLE (table), 1);
     entry = find_string_config_entry (SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND);
 
     button = gtk_button_new_with_mnemonic (_("_Launch"));
     gtk_table_attach (GTK_TABLE (table), GTK_WIDGET (button),
-                      2, 3, 0, 1,
+                      2, 3, 1, 2,
                       (GtkAttachOptions) 0,
                       (GtkAttachOptions) 0, 4, 4);
     g_signal_connect (G_OBJECT (button), "clicked",
@@ -1069,12 +1062,12 @@ create_dict_page (void)
 
     // add word command
     create_entry (SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND,
-                  GTK_TABLE (table), 1);
+                  GTK_TABLE (table), 2);
     entry = find_string_config_entry (SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND);
 
     button = gtk_button_new_with_mnemonic (_("_Launch"));
     gtk_table_attach (GTK_TABLE (table), GTK_WIDGET (button),
-                      2, 3, 1, 2,
+                      2, 3, 2, 3,
                       (GtkAttachOptions) 0,
                       (GtkAttachOptions) 0, 4, 4);
     g_signal_connect (G_OBJECT (button), "clicked",
@@ -1136,6 +1129,9 @@ create_toolbar_page (void)
     widget = create_check_button (SCIM_ANTHY_CONFIG_SHOW_PERIOD_STYLE_LABEL);
     gtk_box_pack_start (GTK_BOX (vbox), widget, FALSE, FALSE, 2);
 
+    widget = create_check_button (SCIM_ANTHY_CONFIG_SHOW_SYMBOL_STYLE_LABEL);
+    gtk_box_pack_start (GTK_BOX (vbox), widget, FALSE, FALSE, 2);
+
     /* dictionary menu */
     widget = create_check_button (SCIM_ANTHY_CONFIG_SHOW_DICT_LABEL);
     g_signal_connect ((gpointer) widget, "toggled",
@@ -1148,15 +1144,11 @@ create_toolbar_page (void)
     gtk_widget_show (hbox);
     label = gtk_label_new ("    ");
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+
     gtk_widget_show (label);
     widget = create_check_button (SCIM_ANTHY_CONFIG_SHOW_DICT_ADMIN_LABEL);
     gtk_box_pack_start (GTK_BOX (hbox), widget, FALSE, FALSE, 0);
 
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
-    gtk_widget_show (hbox);
-    label = gtk_label_new ("    ");
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
     gtk_widget_show (label);
     widget = create_check_button (SCIM_ANTHY_CONFIG_SHOW_ADD_WORD_LABEL);
     gtk_box_pack_start (GTK_BOX (hbox), widget, FALSE, FALSE, 0);
@@ -1234,6 +1226,39 @@ create_appearance_page (void)
 }
 
 static GtkWidget *
+create_about_page ()
+{
+    GtkWidget *vbox, *label;
+    gchar str[256];
+
+    vbox = gtk_vbox_new (FALSE, 0);
+    gtk_widget_show (vbox);
+
+    g_snprintf (
+        str, 256,
+        _("<span size=\"20000\">"
+          "%s-%s"
+          "</span>\n\n"
+
+          "<span size=\"16000\" style=\"italic\">"
+          "A Japanese input method module\nfor SCIM using Anthy"
+          "</span>\n\n\n\n"
+
+          "<span size=\"12000\">"
+          "Copyright 2005-2006, Takuro Ashie &lt;ashie@homa.ne.jp&gt;"
+          "</span>"),
+        PACKAGE, PACKAGE_VERSION);
+
+    label = gtk_label_new (NULL);
+    gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
+    gtk_label_set_markup (GTK_LABEL (label), str);
+    gtk_box_pack_start (GTK_BOX (vbox), label, TRUE, TRUE, 0);
+    gtk_widget_show (label);
+
+    return vbox;
+}
+
+static GtkWidget *
 create_setup_window (void)
 {
     static GtkWidget *window = NULL;
@@ -1248,6 +1273,12 @@ create_setup_window (void)
         // Create the common page.
         GtkWidget *page = create_common_page ();
         GtkWidget *label = gtk_label_new (_("Common"));
+        gtk_widget_show (label);
+        gtk_notebook_append_page (GTK_NOTEBOOK (notebook), page, label);
+
+        // Create the symbols page.
+        page = create_symbols_page ();
+        label = gtk_label_new (_("Symbols"));
         gtk_widget_show (label);
         gtk_notebook_append_page (GTK_NOTEBOOK (notebook), page, label);
 
@@ -1302,6 +1333,12 @@ create_setup_window (void)
         // Create the appearance  page.
         page = create_appearance_page ();
         label = gtk_label_new (_("Appearance"));
+        gtk_widget_show (label);
+        gtk_notebook_append_page (GTK_NOTEBOOK (notebook), page, label);
+
+        // Create the appearance  page.
+        page = create_about_page ();
+        label = gtk_label_new (_("About"));
         gtk_widget_show (label);
         gtk_notebook_append_page (GTK_NOTEBOOK (notebook), page, label);
 
@@ -1488,19 +1525,19 @@ setup_widget_value (void)
 static void
 load_style_files (const char *dirname)
 {
-	GDir *dir;
-	GError *error = NULL;
-	const gchar *entry;
+    GDir *dir;
+    GError *error = NULL;
+    const gchar *entry;
 
     // load system wide style files
-	dir = g_dir_open (dirname, 0, &error);
-	if (error)
-	{
-		//g_warning ("%s", error->message);
-		g_error_free (error);
-	}
+    dir = g_dir_open (dirname, 0, &error);
+    if (error)
+    {
+        //g_warning ("%s", error->message);
+        g_error_free (error);
+    }
 
-	if (dir) {
+    if (dir) {
         while ((entry = g_dir_read_name (dir)))
         {
             String file = dirname;

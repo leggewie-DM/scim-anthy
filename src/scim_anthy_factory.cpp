@@ -87,9 +87,10 @@ extern "C" {
         AnthyFactory *factory = 0;
 
         try {
-            factory = new AnthyFactory (String ("ja_JP"),
-                                        String ("065d7b20-dda2-47fb-8f94-3306d9a25e56"),
-                                        _scim_config);
+            factory = new AnthyFactory (
+                String ("ja_JP"),
+                String ("065d7b20-dda2-47fb-8f94-3306d9a25e56"),
+                _scim_config);
         } catch (...) {
             delete factory;
             factory = 0;
@@ -108,10 +109,12 @@ AnthyFactory::AnthyFactory (const String &lang,
       m_typing_method               (SCIM_ANTHY_CONFIG_TYPING_METHOD_DEFAULT),
       m_conversion_mode             (SCIM_ANTHY_CONFIG_CONVERSION_MODE_DEFAULT),
       m_period_style                (SCIM_ANTHY_CONFIG_PERIOD_STYLE_DEFAULT),
+      m_symbol_style                (SCIM_ANTHY_CONFIG_SYMBOL_STYLE_DEFAULT),
       m_space_type                  (SCIM_ANTHY_CONFIG_SPACE_TYPE_DEFAULT),
       m_ten_key_type                (SCIM_ANTHY_CONFIG_TEN_KEY_TYPE_DEFAULT),
       m_behavior_on_period          (SCIM_ANTHY_CONFIG_BEHAVIOR_ON_PERIOD_DEFAULT),
-      m_show_candidates_label       (SCIM_ANTHY_CONFIG_SHOW_CANDIDATES_LABEL_DEFAULT),
+      m_behavior_on_focus_out       (SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT_DEFAULT),
+     m_show_candidates_label       (SCIM_ANTHY_CONFIG_SHOW_CANDIDATES_LABEL_DEFAULT),
       m_close_cand_win_on_select    (SCIM_ANTHY_CONFIG_CLOSE_CAND_WIN_ON_SELECT_DEFAULT),
       m_cand_win_page_size          (SCIM_ANTHY_CONFIG_CAND_WIN_PAGE_SIZE_DEFAULT),
       m_n_triggers_to_show_cand_win (SCIM_ANTHY_CONFIG_N_TRIGGERS_TO_SHOW_CAND_WIN_DEFAULT),
@@ -120,7 +123,10 @@ AnthyFactory::AnthyFactory (const String &lang,
       m_romaji_half_symbol          (SCIM_ANTHY_CONFIG_ROMAJI_HALF_SYMBOL_DEFAULT),
       m_romaji_half_number          (SCIM_ANTHY_CONFIG_ROMAJI_HALF_NUMBER_DEFAULT),
       m_romaji_allow_split          (SCIM_ANTHY_CONFIG_ROMAJI_ALLOW_SPLIT_DEFAULT),
+      m_romaji_pseudo_ascii_mode    (SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_MODE_DEFAULT),
+      m_romaji_pseudo_ascii_blank_behavior (SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_BLANK_BEHAVIOR),
       m_nicola_time                 (SCIM_ANTHY_CONFIG_NICOLA_TIME_DEFAULT),
+      m_dict_encoding               (SCIM_ANTHY_CONFIG_DICT_ENCODING),
       m_dict_admin_command          (SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND_DEFAULT),
       m_add_word_command            (SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND_DEFAULT),
       m_predict_on_input            (SCIM_ANTHY_CONFIG_PREDICT_ON_INPUT_DEFAULT),
@@ -129,6 +135,7 @@ AnthyFactory::AnthyFactory (const String &lang,
       m_show_conv_mode_label        (SCIM_ANTHY_CONFIG_SHOW_INPUT_MODE_LABEL_DEFAULT),
       m_show_typing_method_label    (SCIM_ANTHY_CONFIG_SHOW_TYPING_METHOD_LABEL_DEFAULT),
       m_show_period_style_label     (SCIM_ANTHY_CONFIG_SHOW_PERIOD_STYLE_LABEL_DEFAULT),
+      m_show_symbol_style_label     (SCIM_ANTHY_CONFIG_SHOW_SYMBOL_STYLE_LABEL_DEFAULT),
       m_show_dict_label             (SCIM_ANTHY_CONFIG_SHOW_DICT_LABEL_DEFAULT),
       m_show_dict_admin_label       (SCIM_ANTHY_CONFIG_SHOW_DICT_ADMIN_LABEL_DEFAULT),
       m_show_add_word_label         (SCIM_ANTHY_CONFIG_SHOW_ADD_WORD_LABEL_DEFAULT),
@@ -200,15 +207,21 @@ WideString
 AnthyFactory::get_credits () const
 {
     return utf8_mbstowcs (
-        _("Special thanks:\n"
+        _("Art work:\n"
+          "  SHIMODA Hiroshi <piro@p.club.ne.jp>\n"
+          "Special thanks:\n"
           "  UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
           "  Yukiko Bando <ybando@k6.dion.ne.jp>\n"
-          "  Mike Fabin <mfabin@suse.de>"
+          "  Mike Fabian <mfabian@suse.de>\n"
           "  David Oftedal <david@start.no>\n"
-          "  Ryo Dairiki <ryo-dairiki@mbm.nifty.com>\n"
+          "  Ryo Dairiki <ryo-dairiki@users.sourceforge.net>\n"
           "  Seiichi SATO\n"
           "  AWASHIRO Ikuya <ikuya@oooug.jp>\n"
-          "  Hatuka*nezumi <nezumi@jca.apc.org>"));
+          "  Hatuka*nezumi <nezumi@jca.apc.org>\n"
+          "  Teppei Tamra <tam-t@par.odn.ne.jp>\n"
+          "  Akira TAGOH <at@gclab.org>\n"
+          "  Tatsuki Sugiura <sugi@nemui.org>\n"
+          "  Takashi Nakamoto <bluedwarf@bpost.plala.or.jp>"));
 }
 
 WideString
@@ -322,7 +335,7 @@ AnthyFactory::remove_config_listener (AnthyInstance *listener)
 #else
 #define APPEND_ACTION(key, func)                                               \
 {                                                                              \
-    String name = "func", str;                                                 \
+    String name = #key, str;                                                   \
     if (loaded) {                                                              \
         String str2, str3;                                                     \
         str2 = String (SCIM_ANTHY_CONFIG_##key##_KEY);                         \
@@ -409,6 +422,7 @@ ANTHY_DEFINE_ACTION (action_wide_latin_mode);
 ANTHY_DEFINE_ACTION (action_hiragana_mode);
 ANTHY_DEFINE_ACTION (action_katakana_mode);
 ANTHY_DEFINE_ACTION (action_half_katakana_mode);
+ANTHY_DEFINE_ACTION (action_cancel_pseudo_ascii_mode);
 ANTHY_DEFINE_ACTION (action_launch_dict_admin_tool);
 ANTHY_DEFINE_ACTION (action_add_word);
 
@@ -434,6 +448,10 @@ AnthyFactory::reload_config (const ConfigPointer &config)
             = config->read (String (SCIM_ANTHY_CONFIG_PERIOD_STYLE),
                             String (SCIM_ANTHY_CONFIG_PERIOD_STYLE_DEFAULT));
 
+        m_symbol_style
+            = config->read (String (SCIM_ANTHY_CONFIG_SYMBOL_STYLE),
+                            String (SCIM_ANTHY_CONFIG_SYMBOL_STYLE_DEFAULT));
+
         m_space_type
             = config->read (String (SCIM_ANTHY_CONFIG_SPACE_TYPE),
                             String (SCIM_ANTHY_CONFIG_SPACE_TYPE_DEFAULT));
@@ -445,6 +463,10 @@ AnthyFactory::reload_config (const ConfigPointer &config)
         m_behavior_on_period
             = config->read (String (SCIM_ANTHY_CONFIG_BEHAVIOR_ON_PERIOD),
                             String (SCIM_ANTHY_CONFIG_BEHAVIOR_ON_PERIOD_DEFAULT));
+
+        m_behavior_on_focus_out
+            = config->read (String (SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT),
+                            String (SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT_DEFAULT));
 
         m_cand_win_page_size
             = config->read (String (SCIM_ANTHY_CONFIG_CAND_WIN_PAGE_SIZE),
@@ -482,6 +504,14 @@ AnthyFactory::reload_config (const ConfigPointer &config)
             = config->read (String (SCIM_ANTHY_CONFIG_ROMAJI_ALLOW_SPLIT),
                             SCIM_ANTHY_CONFIG_ROMAJI_ALLOW_SPLIT_DEFAULT);
 
+        m_romaji_pseudo_ascii_mode
+            = config->read (String (SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_MODE),
+                            SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_MODE_DEFAULT);
+
+        m_romaji_pseudo_ascii_blank_behavior
+            = config->read (String (SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_BLANK_BEHAVIOR),
+                            SCIM_ANTHY_CONFIG_ROMAJI_PSEUDO_ASCII_BLANK_BEHAVIOR_DEFAULT);
+
         m_nicola_time
             = config->read (String (SCIM_ANTHY_CONFIG_NICOLA_TIME),
                             SCIM_ANTHY_CONFIG_NICOLA_TIME_DEFAULT);
@@ -493,6 +523,11 @@ AnthyFactory::reload_config (const ConfigPointer &config)
         str = config->read (String (SCIM_ANTHY_CONFIG_RIGHT_THUMB_SHIFT_KEY),
                             String (SCIM_ANTHY_CONFIG_RIGHT_THUMB_SHIFT_KEY_DEFAULT));
         scim_string_to_key_list (m_right_thumb_keys, str);
+
+
+        m_dict_encoding
+            = config->read (String (SCIM_ANTHY_CONFIG_DICT_ENCODING),
+                            String (SCIM_ANTHY_CONFIG_DICT_ENCODING_DEFAULT));
 
         m_dict_admin_command
             = config->read (String (SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND),
@@ -525,6 +560,10 @@ AnthyFactory::reload_config (const ConfigPointer &config)
         m_show_period_style_label
             = config->read (String (SCIM_ANTHY_CONFIG_SHOW_PERIOD_STYLE_LABEL),
                             SCIM_ANTHY_CONFIG_SHOW_PERIOD_STYLE_LABEL_DEFAULT);
+
+        m_show_symbol_style_label
+            = config->read (String (SCIM_ANTHY_CONFIG_SHOW_SYMBOL_STYLE_LABEL),
+                            SCIM_ANTHY_CONFIG_SHOW_SYMBOL_STYLE_LABEL_DEFAULT);
 
         m_show_dict_label
             = config->read (String (SCIM_ANTHY_CONFIG_SHOW_DICT_LABEL),
@@ -642,6 +681,9 @@ AnthyFactory::reload_config (const ConfigPointer &config)
     APPEND_ACTION (CONV_TO_HALF_KATAKANA,   action_convert_to_half_katakana);
     APPEND_ACTION (CONV_TO_LATIN,           action_convert_to_latin);
     APPEND_ACTION (CONV_TO_WIDE_LATIN,      action_convert_to_wide_latin);
+
+    // pseudo ascii mode
+    APPEND_ACTION (CANCEL_PSEUDO_ASCII_MODE,action_cancel_pseudo_ascii_mode);
 
     // caret keys
     APPEND_ACTION (MOVE_CARET_FIRST,        action_move_caret_first);

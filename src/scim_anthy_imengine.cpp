@@ -52,11 +52,11 @@
 #define SCIM_PROP_INPUT_MODE_LATIN           "/IMEngine/Anthy/InputMode/Latin"
 #define SCIM_PROP_INPUT_MODE_WIDE_LATIN      "/IMEngine/Anthy/InputMode/WideLatin"
 
-#define SCIM_PROP_CONV_MODE                  "/IMEngine/ANthy/ConvMode"
-#define SCIM_PROP_CONV_MODE_MULTI_SEG        "/IMEngine/ANthy/ConvMode/MultiSegment"
-#define SCIM_PROP_CONV_MODE_SINGLE_SEG       "/IMEngine/ANthy/ConvMode/SingleSegment"
-#define SCIM_PROP_CONV_MODE_MULTI_REAL_TIME  "/IMEngine/ANthy/ConvMode/MultiRealTime"
-#define SCIM_PROP_CONV_MODE_SINGLE_REAL_TIME "/IMEngine/ANthy/ConvMode/SingleRealTime"
+#define SCIM_PROP_CONV_MODE                  "/IMEngine/Anthy/ConvMode"
+#define SCIM_PROP_CONV_MODE_MULTI_SEG        "/IMEngine/Anthy/ConvMode/MultiSegment"
+#define SCIM_PROP_CONV_MODE_SINGLE_SEG       "/IMEngine/Anthy/ConvMode/SingleSegment"
+#define SCIM_PROP_CONV_MODE_MULTI_REAL_TIME  "/IMEngine/Anthy/ConvMode/MultiRealTime"
+#define SCIM_PROP_CONV_MODE_SINGLE_REAL_TIME "/IMEngine/Anthy/ConvMode/SingleRealTime"
 
 #define SCIM_PROP_TYPING_METHOD              "/IMEngine/Anthy/TypingMethod"
 #define SCIM_PROP_TYPING_METHOD_ROMAJI       "/IMEngine/Anthy/TypingMethod/RomaKana"
@@ -70,9 +70,24 @@
 #define SCIM_PROP_PERIOD_STYLE_WIDE_LATIN_JAPANESE \
                                              "/IMEngine/Anthy/PeriodType/WideRatin_Japanese"
 
+#define SCIM_PROP_SYMBOL_STYLE               "/IMEngine/Anthy/SymbolType"
+#define SCIM_PROP_SYMBOL_STYLE_JAPANESE      "/IMEngine/Anthy/SymbolType/Japanese"
+#define SCIM_PROP_SYMBOL_STYLE_BRACKET_SLASH "/IMEngine/Anthy/SymbolType/WideBracket_WideSlash"
+#define SCIM_PROP_SYMBOL_STYLE_CORNER_BRACKET_SLASH \
+                                             "/IMEngine/Anthy/SymbolType/CornerBracket_WideSlash"
+#define SCIM_PROP_SYMBOL_STYLE_BRACKET_MIDDLE_DOT \
+                                             "/IMEngine/Anthy/SymbolType/WideBracket_MiddleDot"
+
 #define SCIM_PROP_DICT                       "/IMEngine/Anthy/Dictionary"
 #define SCIM_PROP_DICT_ADD_WORD              "/IMEngine/Anthy/Dictionary/AddWord"
 #define SCIM_PROP_DICT_LAUNCH_ADMIN_TOOL     "/IMEngine/Anthy/Dictionary/LaunchAdminTool"
+
+#define UTF8_BRACKET_CORNER_BEGIN "\xE3\x80\x8C"
+#define UTF8_BRACKET_CORNER_END   "\xE3\x80\x8D"
+#define UTF8_BRACKET_WIDE_BEGIN   "\xEF\xBC\xBB"
+#define UTF8_BRACKET_WIDE_END     "\xEF\xBC\xBD"
+#define UTF8_MIDDLE_DOT           "\xE3\x83\xBB"
+#define UTF8_SLASH_WIDE           "\xEF\xBC\x8F"
 
 AnthyInstance::AnthyInstance (AnthyFactory   *factory,
                               const String   &encoding,
@@ -180,13 +195,35 @@ bool
 AnthyInstance::process_key_event_lookup_keybind (const KeyEvent& key)
 {
     std::vector<Action>::iterator it;
-    for (it = m_factory->m_actions.begin();
+
+    m_last_key = key;
+
+    /* try to find a "insert a blank" action to be not stolen a blank key
+     * when entering the pseudo ascii mode.
+     */
+    if (get_pseudo_ascii_mode () != 0 &&
+        m_factory->m_romaji_pseudo_ascii_blank_behavior &&
+        m_preedit.is_pseudo_ascii_mode ()) {
+        for (it  = m_factory->m_actions.begin();
+             it != m_factory->m_actions.end();
+             it++) {
+            if (it->match_action_name ("INSERT_SPACE") &&
+                it->perform (this, key)) {
+                return true;
+            }
+        }
+    }
+    for (it  = m_factory->m_actions.begin();
          it != m_factory->m_actions.end();
          it++)
     {
-        if (it->perform (this, key))
+        if (it->perform (this, key)) {
+            m_last_key = KeyEvent ();
             return true;
+        }
     }
+
+    m_last_key = KeyEvent ();
 
     return false;
 }
@@ -262,7 +299,7 @@ AnthyInstance::process_key_event (const KeyEvent& key)
 
     // for wide Latin mode
     if (m_preedit.get_input_mode () == SCIM_ANTHY_MODE_WIDE_LATIN)
-        process_key_event_wide_latin_mode (key);
+        return process_key_event_wide_latin_mode (key);
 
     // for other mode
     if (get_typing_method () != SCIM_ANTHY_TYPING_METHOD_NICOLA ||
@@ -293,7 +330,8 @@ AnthyInstance::select_candidate_no_direct (unsigned int item)
     if (m_preedit.is_predicting () && !m_preedit.is_converting ())
         action_predict ();
 
-    if (!is_selecting_candidates ()) return;
+    if (!is_selecting_candidates ())
+        return;
 
     // update lookup table
     m_lookup_table.set_cursor_pos_in_current_page (item);
@@ -417,6 +455,15 @@ void
 AnthyInstance::focus_out ()
 {
     SCIM_DEBUG_IMENGINE(2) << "focus_out.\n";
+
+    if (m_preedit.is_preediting ()) {
+        if (m_factory->m_behavior_on_focus_out == "Clear")
+            reset ();
+        else if (m_factory->m_behavior_on_focus_out == "Commit")
+            action_commit (m_factory->m_learn_on_auto_commit);
+        else
+            action_commit (m_factory->m_learn_on_auto_commit);
+    }
 
     Transaction send;
     send.put_command (SCIM_TRANS_CMD_REQUEST);
@@ -605,6 +652,56 @@ AnthyInstance::install_properties (void)
             m_properties.push_back (prop);
         }
 
+        if (m_factory->m_show_symbol_style_label) {
+            prop = Property (SCIM_PROP_SYMBOL_STYLE,
+                             UTF8_BRACKET_CORNER_BEGIN
+                             UTF8_BRACKET_CORNER_END
+                             UTF8_MIDDLE_DOT,
+                             String (""),
+                             _("Symbol style"));
+            m_properties.push_back (prop);
+
+            prop = Property (SCIM_PROP_SYMBOL_STYLE_JAPANESE,
+                             UTF8_BRACKET_CORNER_BEGIN
+                             UTF8_BRACKET_CORNER_END
+                             UTF8_MIDDLE_DOT,
+                             String (""),
+                             UTF8_BRACKET_CORNER_BEGIN
+                             UTF8_BRACKET_CORNER_END
+                             UTF8_MIDDLE_DOT);
+            m_properties.push_back (prop);
+
+            prop = Property (SCIM_PROP_SYMBOL_STYLE_CORNER_BRACKET_SLASH,
+                             UTF8_BRACKET_CORNER_BEGIN
+                             UTF8_BRACKET_CORNER_END
+                             UTF8_SLASH_WIDE,
+                             String (""),
+                             UTF8_BRACKET_CORNER_BEGIN
+                             UTF8_BRACKET_CORNER_END
+                             UTF8_SLASH_WIDE);
+            m_properties.push_back (prop);
+
+            prop = Property (SCIM_PROP_SYMBOL_STYLE_BRACKET_MIDDLE_DOT,
+                             UTF8_BRACKET_WIDE_BEGIN
+                             UTF8_BRACKET_WIDE_END
+                             UTF8_MIDDLE_DOT,
+                             String (""),
+                             UTF8_BRACKET_WIDE_BEGIN
+                             UTF8_BRACKET_WIDE_END
+                             UTF8_MIDDLE_DOT);
+            m_properties.push_back (prop);
+
+            prop = Property (SCIM_PROP_SYMBOL_STYLE_BRACKET_SLASH,
+                             UTF8_BRACKET_WIDE_BEGIN
+                             UTF8_BRACKET_WIDE_END
+                             UTF8_SLASH_WIDE,
+                             String (""),
+                             UTF8_BRACKET_WIDE_BEGIN
+                             UTF8_BRACKET_WIDE_END
+                             UTF8_SLASH_WIDE);
+            m_properties.push_back (prop);
+        }
+
         if (m_factory->m_show_dict_label) {
             prop = Property (SCIM_PROP_DICT,
                              String(""), //_("Dictionary"),
@@ -635,6 +732,8 @@ AnthyInstance::install_properties (void)
     set_typing_method (get_typing_method ());
     set_period_style (m_preedit.get_period_style (),
                       m_preedit.get_comma_style ());
+    set_symbol_style (m_preedit.get_bracket_style (),
+                      m_preedit.get_slash_style ());
 
     register_properties (m_properties);
 }
@@ -746,11 +845,14 @@ AnthyInstance::set_typing_method (TypingMethod method)
 
     if (method != get_typing_method ()) {
         Key2KanaTable *fundamental_table = NULL;
-        if (method == SCIM_ANTHY_TYPING_METHOD_ROMAJI)
+
+        if (method == SCIM_ANTHY_TYPING_METHOD_ROMAJI) {
             fundamental_table = m_factory->m_custom_romaji_table;
-        else if (method == SCIM_ANTHY_TYPING_METHOD_KANA)
+        } else if (method == SCIM_ANTHY_TYPING_METHOD_KANA) {
             fundamental_table = m_factory->m_custom_kana_table;
+        }
         m_preedit.set_typing_method (method);
+        m_preedit.set_pseudo_ascii_mode (get_pseudo_ascii_mode ());
     }
 }
 
@@ -802,6 +904,50 @@ AnthyInstance::set_period_style (PeriodStyle period,
         m_preedit.set_period_style (period);
     if (comma != m_preedit.get_comma_style ())
         m_preedit.set_comma_style (comma);
+}
+
+void
+AnthyInstance::set_symbol_style (BracketStyle bracket,
+                                 SlashStyle   slash)
+{
+    String label;
+
+    switch (bracket) {
+    case SCIM_ANTHY_BRACKET_JAPANESE:
+        label = UTF8_BRACKET_CORNER_BEGIN UTF8_BRACKET_CORNER_END;
+        break;
+    case SCIM_ANTHY_BRACKET_WIDE:
+        label = UTF8_BRACKET_WIDE_BEGIN UTF8_BRACKET_WIDE_END;
+        break;
+    default:
+        break;
+    }
+
+    switch (slash) {
+    case SCIM_ANTHY_SLASH_JAPANESE:
+        label += UTF8_MIDDLE_DOT;
+        break;
+    case SCIM_ANTHY_SLASH_WIDE:
+        label += UTF8_SLASH_WIDE;
+        break;
+    default:
+        break;
+    }
+
+    if (label.length () > 0) {
+        PropertyList::iterator it = std::find (m_properties.begin (),
+                                               m_properties.end (),
+                                               SCIM_PROP_SYMBOL_STYLE);
+        if (it != m_properties.end ()) {
+            it->set_label (label.c_str ());
+            update_property (*it);
+        }
+    }
+
+    if (bracket != m_preedit.get_bracket_style ())
+        m_preedit.set_bracket_style (bracket);
+    if (slash != m_preedit.get_slash_style ())
+        m_preedit.set_slash_style (slash);
 }
 
 bool
@@ -993,15 +1139,17 @@ AnthyInstance::action_delete (void)
 bool
 AnthyInstance::action_insert_space (void)
 {
-    if (m_preedit.is_preediting ())
-        return false;
+    String str;
+    bool is_wide = false, retval = false;
 
-    bool is_wide = false;
+    if (m_preedit.is_preediting () && !m_factory->m_romaji_pseudo_ascii_blank_behavior)
+        return false;
 
     if (m_factory->m_space_type == "FollowMode") {
         InputMode mode = get_input_mode ();
         if (mode == SCIM_ANTHY_MODE_LATIN ||
-            mode == SCIM_ANTHY_MODE_HALF_KATAKANA)
+            mode == SCIM_ANTHY_MODE_HALF_KATAKANA ||
+            m_preedit.is_pseudo_ascii_mode ())
         {
             is_wide = false;
         } else {
@@ -1011,21 +1159,39 @@ AnthyInstance::action_insert_space (void)
         is_wide = true;
     }
 
-    if (is_wide)
-        commit_string (utf8_mbstowcs ("\xE3\x80\x80"));
-    else
-        commit_string (utf8_mbstowcs (" "));
+    if (is_wide) {
+        str = "\xE3\x80\x80";
+        retval = true;
+    } else if (get_typing_method () == SCIM_ANTHY_TYPING_METHOD_NICOLA || // FIXME! it's a ad-hoc solution.
+               m_preedit.is_pseudo_ascii_mode () ||
+               (m_last_key.code != SCIM_KEY_space &&
+                m_last_key.code != SCIM_KEY_KP_Space))
+    {
+        str = " ";
+        retval = true;
+    }
 
-    return true;
+    if (retval) {
+        if (m_preedit.is_pseudo_ascii_mode ()) {
+            m_preedit.append (m_last_key, str);
+            show_preedit_string ();
+            m_preedit_string_visible = true;
+            set_preedition ();
+        } else {
+            commit_string (utf8_mbstowcs (str));
+        }
+    }
+
+    return retval;
 }
 
 bool 
 AnthyInstance::action_insert_alternative_space (void)
 {
+    bool is_wide = false;
+
     if (m_preedit.is_preediting ())
         return false;
-
-    bool is_wide = false;
 
     if (m_factory->m_space_type == "FollowMode") {
         InputMode mode = get_input_mode ();
@@ -1040,12 +1206,18 @@ AnthyInstance::action_insert_alternative_space (void)
         is_wide = true;
     }
 
-    if (is_wide)
+    if (is_wide) {
         commit_string (utf8_mbstowcs ("\xE3\x80\x80"));
-    else
+        return true;
+    } else if (get_typing_method () == SCIM_ANTHY_TYPING_METHOD_NICOLA || // FIXME! it's a ad-hoc solution.
+               (m_last_key.code != SCIM_KEY_space &&
+                m_last_key.code != SCIM_KEY_KP_Space))
+    {
         commit_string (utf8_mbstowcs (" "));
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 bool
@@ -1054,9 +1226,14 @@ AnthyInstance::action_insert_half_space (void)
     if (m_preedit.is_preediting ())
         return false;
 
-    commit_string (utf8_mbstowcs (" "));
+    if (m_last_key.code != SCIM_KEY_space &&
+        m_last_key.code != SCIM_KEY_KP_Space)
+    {
+        commit_string (utf8_mbstowcs (" "));
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 bool
@@ -1247,6 +1424,8 @@ AnthyInstance::action_commit_first_segment (void)
     commit_string (m_preedit.get_segment_string (0));
     if (m_factory->m_learn_on_manual_commit)
         m_preedit.commit (0);
+    else
+        m_preedit.clear (0);
 
     set_preedition ();
 
@@ -1270,6 +1449,8 @@ AnthyInstance::action_commit_selected_segment (void)
         commit_string (m_preedit.get_segment_string (i));
     if (m_factory->m_learn_on_manual_commit)
         m_preedit.commit (m_preedit.get_selected_segment ());
+    else
+        m_preedit.clear (m_preedit.get_selected_segment ());
 
     set_preedition ();
 
@@ -1292,6 +1473,8 @@ AnthyInstance::action_commit_first_segment_reverse_preference (void)
     commit_string (m_preedit.get_segment_string (0));
     if (!m_factory->m_learn_on_manual_commit)
         m_preedit.commit (0);
+    else
+        m_preedit.clear (0);
 
     set_preedition ();
 
@@ -1315,6 +1498,8 @@ AnthyInstance::action_commit_selected_segment_reverse_preference (void)
         commit_string (m_preedit.get_segment_string (i));
     if (!m_factory->m_learn_on_manual_commit)
         m_preedit.commit (m_preedit.get_selected_segment ());
+    else
+        m_preedit.clear (m_preedit.get_selected_segment ());
 
     set_preedition ();
 
@@ -1425,6 +1610,10 @@ AnthyInstance::action_candidates_page_down (void)
 bool
 AnthyInstance::action_select_candidate (unsigned int i)
 {
+    // FIXME! m_lookup_table_visible should be set as true also on predicting
+    if (!m_lookup_table_visible && !m_preedit.is_predicting ())
+        return false;
+
     if (m_preedit.is_predicting () && !m_preedit.is_converting () &&
         m_factory->m_use_direct_key_on_predict)
     {
@@ -1630,6 +1819,19 @@ bool
 AnthyInstance::action_half_katakana_mode (void)
 {
     set_input_mode (SCIM_ANTHY_MODE_HALF_KATAKANA);
+    return true;
+}
+
+bool
+AnthyInstance::action_cancel_pseudo_ascii_mode (void)
+{
+    if (!m_preedit.is_preediting ())
+        return false;
+    if (!m_preedit.is_pseudo_ascii_mode ())
+        return false;
+
+    m_preedit.reset_pseudo_ascii_mode ();
+
     return true;
 }
 
@@ -1858,7 +2060,7 @@ AnthyInstance::timeout_add (uint32 time_msec, timeout_func timeout_fn,
     /*
      * FIXME! Obsoleted closures should be removed at somewhere.
      * Currenly only NICOLA related timer uses this feature and it will be
-     * removed each time on key press event so memory leaks doesn't exit.
+     * removed each time on key press event so memory leaks doesn't exist.
      */
 
     Transaction send;
@@ -1936,6 +2138,20 @@ AnthyInstance::trigger_property (const String &property)
         set_period_style (SCIM_ANTHY_PERIOD_HALF,
                           SCIM_ANTHY_COMMA_HALF);
 
+    // symbol type
+    } else if (property == SCIM_PROP_SYMBOL_STYLE_JAPANESE) {
+        set_symbol_style (SCIM_ANTHY_BRACKET_JAPANESE,
+                          SCIM_ANTHY_SLASH_JAPANESE);
+    } else if (property == SCIM_PROP_SYMBOL_STYLE_CORNER_BRACKET_SLASH) {
+        set_symbol_style (SCIM_ANTHY_BRACKET_JAPANESE,
+                          SCIM_ANTHY_SLASH_WIDE);
+    } else if (property == SCIM_PROP_SYMBOL_STYLE_BRACKET_MIDDLE_DOT) {
+        set_symbol_style (SCIM_ANTHY_BRACKET_WIDE,
+                          SCIM_ANTHY_SLASH_JAPANESE);
+    } else if (property == SCIM_PROP_SYMBOL_STYLE_BRACKET_SLASH) {
+        set_symbol_style (SCIM_ANTHY_BRACKET_WIDE,
+                          SCIM_ANTHY_SLASH_WIDE);
+
     // dictionary
     } else if (property == SCIM_PROP_DICT_ADD_WORD) {
         action_add_word ();
@@ -1960,6 +2176,8 @@ AnthyInstance::process_helper_event (const String &helper_uuid,
     switch (cmd) {
     case SCIM_ANTHY_TRANS_CMD_GET_SELECTION:
     {
+        // For reconversion feature, but this code is ad-hoc solution.
+
         WideString selection, surround;
         if (!reader.get_data (selection) || selection.empty ())
             break;
@@ -1967,24 +2185,31 @@ AnthyInstance::process_helper_event (const String &helper_uuid,
         int cursor;
         unsigned int len = selection.length ();
         if (!get_surrounding_text (surround, cursor, len, len))
-            break;
-
-        if (surround.length () - cursor >= len &&
-            surround.substr (cursor, len) == selection)
         {
-            delete_surrounding_text (0, len);
-            m_preedit.convert (selection);
-            set_preedition ();
-            set_lookup_table ();
+            // We expect application to delete selection text.
+            m_preedit.convert(selection);
+            set_preedition();
+            set_lookup_table();
         }
-
-        if (cursor >= (int) len &&
-            surround.substr (cursor - len, len) == selection)
+        else
         {
-            delete_surrounding_text (0 - len, len);
-            m_preedit.convert (selection);
-            set_preedition ();
-            set_lookup_table ();
+            // This code will conflict if same string exists at both before and
+            // after the caret.
+            if (surround.length () - cursor >= len &&
+                surround.substr (cursor, len) == selection)
+            {
+                delete_surrounding_text (0, len);
+                m_preedit.convert (selection);
+                set_preedition ();
+                set_lookup_table ();
+            } else if (cursor >= (int) len &&
+                       surround.substr (cursor - len, len) == selection)
+            {
+                delete_surrounding_text (0 - len, len);
+                m_preedit.convert (selection);
+                set_preedition ();
+                set_lookup_table ();
+            }
         }
         break;
     }
@@ -2025,16 +2250,19 @@ AnthyInstance::reload_config (const ConfigPointer &config)
             m_preedit.set_input_mode (SCIM_ANTHY_MODE_WIDE_LATIN);
     }
 
-    // set typing method
+    // set typing method and pseudo ASCII mode
     if (m_on_init || !m_factory->m_show_typing_method_label) {
-        if (m_factory->m_typing_method == "NICOLA")
+        if (m_factory->m_typing_method == "NICOLA") {
             m_preedit.set_typing_method (SCIM_ANTHY_TYPING_METHOD_NICOLA);
-        else if (m_factory->m_typing_method == "Kana")
+        } else if (m_factory->m_typing_method == "Kana") {
             m_preedit.set_typing_method (SCIM_ANTHY_TYPING_METHOD_KANA);
-        else
+        } else {
             m_preedit.set_typing_method (SCIM_ANTHY_TYPING_METHOD_ROMAJI);
+        }
+        m_preedit.set_pseudo_ascii_mode (get_pseudo_ascii_mode ());
     } else {
-        m_preedit.set_typing_method (m_preedit.get_typing_method ());
+        m_preedit.set_typing_method (get_typing_method ());
+        m_preedit.set_pseudo_ascii_mode (get_pseudo_ascii_mode ());
     }
 
     // set conversion mode
@@ -2069,6 +2297,26 @@ AnthyInstance::reload_config (const ConfigPointer &config)
         }
     }
 
+    // set symbol style
+    if (m_on_init || !m_factory->m_show_symbol_style_label) {
+        if (m_factory->m_symbol_style == "Japanese") {
+            m_preedit.set_bracket_style (SCIM_ANTHY_BRACKET_JAPANESE);
+            m_preedit.set_slash_style   (SCIM_ANTHY_SLASH_JAPANESE);
+        } else if (m_factory->m_symbol_style == "WideBracket_WideSlash") {
+            m_preedit.set_bracket_style (SCIM_ANTHY_BRACKET_WIDE);
+            m_preedit.set_slash_style   (SCIM_ANTHY_SLASH_WIDE);
+        } else if (m_factory->m_symbol_style == "CornerBracket_WideSlash") {
+            m_preedit.set_bracket_style (SCIM_ANTHY_BRACKET_JAPANESE);
+            m_preedit.set_slash_style   (SCIM_ANTHY_SLASH_WIDE);
+        } else if (m_factory->m_symbol_style == "WideBracket_MiddleDot") {
+            m_preedit.set_bracket_style (SCIM_ANTHY_BRACKET_WIDE);
+            m_preedit.set_slash_style   (SCIM_ANTHY_SLASH_JAPANESE);
+        } else {
+            m_preedit.set_bracket_style (SCIM_ANTHY_BRACKET_JAPANESE);
+            m_preedit.set_slash_style   (SCIM_ANTHY_SLASH_JAPANESE);
+        }
+    }
+
     // set lookup table
     if (m_factory->m_cand_win_page_size > 0)
         m_lookup_table.set_page_size (m_factory->m_cand_win_page_size);
@@ -2078,6 +2326,9 @@ AnthyInstance::reload_config (const ConfigPointer &config)
     // setup toolbar
     m_properties.clear ();
     install_properties ();
+
+    // set encoding
+    m_preedit.set_dict_encoding (m_factory->m_dict_encoding);
 }
 
 bool
@@ -2099,6 +2350,21 @@ AnthyInstance::is_realtime_conversion (void)
     else
         return false;
 }
+
+int
+AnthyInstance::get_pseudo_ascii_mode (void)
+{
+    int retval = 0;
+    TypingMethod m = get_typing_method ();
+
+    if (m == SCIM_ANTHY_TYPING_METHOD_ROMAJI) {
+        if (m_factory->m_romaji_pseudo_ascii_mode)
+            retval |= SCIM_ANTHY_PSEUDO_ASCII_TRIGGERED_CAPITALIZED;
+    }
+
+    return retval;
+}
+
 /*
 vi:ts=4:nowrap:ai:expandtab
 */

@@ -191,6 +191,13 @@ Preedit::process_key_event (const KeyEvent & key)
     return retval;
 }
 
+bool
+Preedit::append (const KeyEvent & key,
+                 const String   & string)
+{
+    return m_reading.append (key, string);
+}
+
 void
 Preedit::erase (bool backward)
 {
@@ -369,11 +376,23 @@ Preedit::predict (void)
  * clear all string
  */
 void
-Preedit::clear (void)
+Preedit::clear (int segment_id)
 {
-    m_reading.clear ();
-    m_conversion.clear ();
-    m_source = WideString ();
+    // FIXME! We should add implementation not only for conversion string but
+    // also for reading string.
+
+    if (!is_converting ()) {
+        m_reading.clear ();
+        m_conversion.clear ();
+        m_source = WideString ();
+        return;
+    }
+
+    m_conversion.clear (segment_id);
+    if (m_conversion.get_nr_segments () <= 0) {
+        m_reading.clear ();
+        m_source = WideString ();
+    }
 }
 
 
@@ -429,6 +448,30 @@ Preedit::get_comma_style (void)
 }
 
 void
+Preedit::set_bracket_style (BracketStyle style)
+{
+    m_reading.set_bracket_style (style);
+}
+
+BracketStyle
+Preedit::get_bracket_style (void)
+{
+    return m_reading.get_bracket_style ();
+}
+
+void
+Preedit::set_slash_style (SlashStyle style)
+{
+    m_reading.set_slash_style (style);
+}
+
+SlashStyle
+Preedit::get_slash_style (void)
+{
+    return m_reading.get_slash_style ();
+}
+
+void
 Preedit::set_symbol_width (bool half)
 {
     m_reading.set_symbol_width (half);
@@ -450,6 +493,30 @@ bool
 Preedit::get_number_width (void)
 {
     return m_reading.get_number_width ();
+}
+
+void
+Preedit::set_pseudo_ascii_mode (int mode)
+{
+    m_reading.set_pseudo_ascii_mode (mode);
+}
+
+bool
+Preedit::is_pseudo_ascii_mode (void)
+{
+    return m_reading.is_pseudo_ascii_mode ();
+}
+
+void
+Preedit::reset_pseudo_ascii_mode (void)
+{
+    m_reading.reset_pseudo_ascii_mode ();
+}
+
+void
+Preedit::set_dict_encoding (String type)
+{
+    m_conversion.set_dict_encoding (type);
 }
 
 bool
