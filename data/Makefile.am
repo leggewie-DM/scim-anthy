@@ -31,6 +31,7 @@ style_DATA		= atok.sty \
 			  azik.sty \
 			  101kana.sty \
 			  nicola-a.sty \
+			  nicola-f.sty \
 			  nicola-j.sty \
 			  oasys100j.sty \
 			  tron-dvorak.sty \

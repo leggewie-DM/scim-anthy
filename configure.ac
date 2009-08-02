@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 
-AC_INIT(scim-anthy, 1.2.4, ashie@homa.ne.jp)
+AC_INIT(scim-anthy, 1.2.7, ashie@homa.ne.jp)
 AC_CONFIG_SRCDIR([configure.ac])
 
 # Save this value here, since automake will set cflags and cxxflags later
@@ -10,7 +10,7 @@ cppflags_set=${CPPFLAGS+set}
 
 SCIM_ANTHY_MAJOR_VERSION=1
 SCIM_ANTHY_MINOR_VERSION=2
-SCIM_ANTHY_MICRO_VERSION=4
+SCIM_ANTHY_MICRO_VERSION=7
 
 SCIM_ANTHY_VERSION=$SCIM_ANTHY_MAJOR_VERSION.$SCIM_ANTHY_MINOR_VERSION.$SCIM_ANTHY_MICRO_VERSION
 
@@ -24,7 +24,7 @@ AM_INIT_AUTOMAKE(1.9)
 AM_CONFIG_HEADER(config.h)
 
 # Init gettext
-ALL_LINGUAS="ja"
+ALL_LINGUAS="de ja"
 AM_GNU_GETTEXT
 
 GETTEXT_PACKAGE=scim-anthy

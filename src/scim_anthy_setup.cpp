@@ -27,6 +27,7 @@
   #include <config.h>
 #endif
 
+#include <string.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
@@ -275,6 +276,7 @@ static ComboConfigCandidate behavior_on_focus_out[] =
 
 static ComboConfigCandidate dict_encoding[] =
 {
+    {N_("UTF-8"),     "UTF-8"},
     {N_("EUC-JP"),    "EUC-JP"},
     {N_("EUC-JP-MS"), "EUC-JP-MS"},
     {NULL, NULL},
@@ -1522,6 +1524,26 @@ setup_widget_value (void)
     setup_key_theme_menu (GTK_OPTION_MENU (__widget_key_theme_menu));
 }
 
+bool operator < (const StyleFile &left, const StyleFile &right)
+{
+    if (const_cast<StyleFile&>(left).get_title() <
+        const_cast<StyleFile&>(right).get_title())
+    {
+        return true;
+    }
+    return false;
+}
+
+bool operator > (const StyleFile &left, const StyleFile &right)
+{
+    if (const_cast<StyleFile&>(left).get_title() >
+        const_cast<StyleFile&>(right).get_title())
+    {
+        return true;
+    }
+    return false;
+}
+
 static void
 load_style_files (const char *dirname)
 {
@@ -1553,6 +1575,7 @@ load_style_files (const char *dirname)
         }
         g_dir_close (dir);
     }
+    std::sort(__style_list.begin(), __style_list.end());
 }
 
 static void

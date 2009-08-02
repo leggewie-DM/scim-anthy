@@ -1,3 +1,60 @@
+2009-0l-29 Takuro Ashie <ashie@homa.ne.jp>
+
+	* configure.ac: Version-1.2.7.
+
+2009-01-25 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_conversion.cpp: Add missing include file.
+	Thanks Utumi-san, Ikuya-san.
+
+2009-0l-15 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_conversion.cpp, src/scim_anthy_setup.cpp,
+	  src/scim_anthy_prefs.h:
+	Set UTF-8 as default encoding (ported from 1.4 branch).
+
+2009-0l-14 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_imengine.cpp: Removed a needless line.
+
+2008-08-04 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_reading.cpp: Set NICOLA engine as case sensitive.
+
+2008-03-29 Takuro Ashie <ashie@homa.ne.jp>
+
+	* configure.ac: Version-1.2.6.
+
+2008-03-28 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_factory.cpp, src/scim_anthy_imengine.cpp,
+	  src/scim_anthy_prefs.cpp:
+	Fix typo. Thanks Malcolm Parsons and Ikuya Awashiro. 
+
+2008-02-29 Takuro Ashie <ashie@homa.ne.jp>
+
+	* configure.ac: Version-1.2.5.
+
+2008-02-26 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.cpp: Sort style file list by name.
+
+2008-02-25 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_factory.cpp: Update credit.
+
+2008-01-23 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_imengine.cpp, src/scim_anthy_kana.cpp,
+	  src/scim_anthy_preedit.cpp, src/scim_anthy_prefs.cpp,
+	  src/scim_anthy_setup.cpp, src/scim_anthy_utils.cpp:
+	Added missing include files to build against gcc-4.3.
+
+2007-10-12 Takuro Ashie <ashie@homa.ne.jp>
+
+	* po/de.po: Add. Thanks Gerrit Sangel.
+	* data/nicola-f.sty: Backport from trunk. 
+
 2007-05-29 Takuro Ashie <ashie@homa.ne.jp>
 
 	* configure.ac: Version-1.2.4.
