@@ -19,6 +19,7 @@
  */
 
 #define SCIM_ANTHY_USE_GTK
+#include <string.h>
 #include <scim.h>
 #include "scim_anthy_prefs.h"
 #include "scim_anthy_intl.h"
@@ -783,9 +784,9 @@ StringConfigData config_keyboards_caret [] =
         SCIM_ANTHY_CONFIG_MOVE_CARET_FORWARD_KEY,
         SCIM_ANTHY_CONFIG_MOVE_CARET_FORWARD_KEY_DEFAULT,
         SCIM_ANTHY_CONFIG_MOVE_CARET_FORWARD_KEY_DEFAULT,
-        N_("Move to forward"),
-        N_("Select move caret to forward keys"),
-        N_("The key events to move the caret to forward. "),
+        N_("Move forward"),
+        N_("Select move caret forward keys"),
+        N_("The key events to move the caret forward. "),
         NULL,
         false,
     },
@@ -793,9 +794,9 @@ StringConfigData config_keyboards_caret [] =
         SCIM_ANTHY_CONFIG_MOVE_CARET_BACKWARD_KEY,
         SCIM_ANTHY_CONFIG_MOVE_CARET_BACKWARD_KEY_DEFAULT,
         SCIM_ANTHY_CONFIG_MOVE_CARET_BACKWARD_KEY_DEFAULT,
-        N_("Move to backward"),
-        N_("Select move caret to backward keys"),
-        N_("The key events to move the caret to backward. "),
+        N_("Move backward"),
+        N_("Select move caret backward keys"),
+        N_("The key events to move the caret backward. "),
         NULL,
         false,
     },
@@ -1099,8 +1100,8 @@ StringConfigData config_keyboards_converting [] =
         SCIM_ANTHY_CONFIG_CONV_CHAR_TYPE_FORWARD_KEY,
         SCIM_ANTHY_CONFIG_CONV_CHAR_TYPE_FORWARD_KEY_DEFAULT,
         SCIM_ANTHY_CONFIG_CONV_CHAR_TYPE_FORWARD_KEY_DEFAULT,
-        N_("Convert character type to forward"),
-        N_("Select keys to convert character type to forward"),
+        N_("Convert character type forward"),
+        N_("Select keys to convert character type forward"),
         N_("Rotate character type forward."),
         NULL,
         false,
@@ -1109,8 +1110,8 @@ StringConfigData config_keyboards_converting [] =
         SCIM_ANTHY_CONFIG_CONV_CHAR_TYPE_BACKWARD_KEY,
         SCIM_ANTHY_CONFIG_CONV_CHAR_TYPE_BACKWARD_KEY_DEFAULT,
         SCIM_ANTHY_CONFIG_CONV_CHAR_TYPE_BACKWARD_KEY_DEFAULT,
-        N_("Convert character type to backward"),
-        N_("Select keys to convert character type to backward"),
+        N_("Convert character type backward"),
+        N_("Select keys to convert character type backward"),
         N_("Rotate character type backward."),
         NULL,
         false,

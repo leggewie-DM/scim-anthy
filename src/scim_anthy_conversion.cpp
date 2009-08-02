@@ -17,10 +17,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <string.h>
+
 #include "scim_anthy_factory.h"
 #include "scim_anthy_imengine.h"
 #include "scim_anthy_conversion.h"
 #include "scim_anthy_utils.h"
+#include "scim_anthy_prefs.h"
 
 using namespace scim_anthy;
 
@@ -87,11 +90,7 @@ Conversion::Conversion (AnthyInstance &anthy, Reading &reading)
       m_cur_segment        (-1),
       m_predicting         (false)
 {
-#ifdef HAS_ANTHY_CONTEXT_SET_ENCODING
-    anthy_context_set_encoding (m_anthy_context, ANTHY_EUC_JP_ENCODING);
-#endif /* HAS_ANTHY_CONTEXT_SET_ENCODING */
-
-    set_dict_encoding (String ("EUC-JP"));
+    set_dict_encoding (String (SCIM_ANTHY_CONFIG_DICT_ENCODING_DEFAULT));
 }
 
 Conversion::~Conversion ()
@@ -711,6 +710,16 @@ Conversion::select_candidate (int candidate_id, int segment_id)
 bool
 Conversion::set_dict_encoding (String type)
 {
+#ifdef HAS_ANTHY_CONTEXT_SET_ENCODING
+    if (!strcasecmp (type.c_str (), "UTF-8") ||
+        !strcasecmp (type.c_str (), "UTF8"))
+    {
+        anthy_context_set_encoding (m_anthy_context, ANTHY_UTF8_ENCODING);
+    } else {
+        anthy_context_set_encoding (m_anthy_context, ANTHY_EUC_JP_ENCODING);
+    }
+#endif /* HAS_ANTHY_CONTEXT_SET_ENCODING */
+
     if (m_iconv.set_encoding (type.c_str ())) {
         return true;
     } else {
