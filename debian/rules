@@ -28,14 +28,7 @@ endif
 config.status: configure
 configure: configure-stamp
 configure-stamp: patch-stamp
-	dh_testdir
-	for file in config.sub config.guess po/ja.gmo po/de.gmo ; do \
-		mv -f "$$file" "$$file".orig ;\
-		[ ! -r /usr/share/misc/"$$file" ] || cp -f /usr/share/misc/"$$file" "$$file" ;\
-	done
-	# Add here commands to configure the package.
-	CFLAGS="$(CFLAGS)" ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info
-
+	dh_auto_configure
 
 build: build-stamp
 
@@ -45,9 +38,8 @@ build-stamp:  config.status
 	# Add here commands to compile the package.
 	$(MAKE)
 	#msgfmt -o po/ja.gmo po/ja.po
-	cd po; make update-gmo; cd ../
+	$(MAKE) update-gmo -C po
 	#docbook-to-man debian/scim-anthy.sgml > scim-anthy.1
-
 
 	touch build-stamp
 
@@ -55,10 +47,6 @@ clean: unpatch
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp config.log libtool
-
-	for file in config.sub config.guess po/ja.gmo po/de.gmo ; do \
-		[ ! -r "$$file".orig ] || mv -f "$$file".orig "$$file" || : ;\
-	done
 
 	# Add here commands to clean up after the build process.
 	[ ! -f Makefile ] || $(MAKE) distclean
