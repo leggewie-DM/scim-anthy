@@ -12,7 +12,7 @@ Standards-Version: 3.8.2
 
 Package: scim-anthy
 Architecture: any
-Depends: ${shlibs:Depends}, anthy, scim (<< 1.5)
+Depends: ${shlibs:Depends}, ${misc:Depends}, anthy, scim (<< 1.5)
 Recommends: kasumi
 Description: SCIM IMEngine module for Anthy
  Smart Common Input Method platform (SCIM) is an input method server
