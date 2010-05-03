@@ -6,7 +6,7 @@ Uploaders: Rolf Leggewie <foss@rolf.leggewie.biz>
 Homepage: http://scim-imengine.sourceforge.jp/
 Vcs-Browser: http://git.debian.org/?p=collab-maint/scim-anthy.git
 Vcs-Git: git://git.debian.org/collab-maint/scim-anthy.git
-Build-Depends: debhelper (>= 5.0.0), dpatch (>= 1.11), libanthy-dev,
+Build-Depends: debhelper (>= 5.0.0), libanthy-dev,
  scim (>= 1.4.6), libscim-dev (>= 1.4.6), autotools-dev, pkg-config
 Standards-Version: 3.8.2
 
