@@ -3,5 +3,5 @@ version=3
 
 opts="downloadurlmangle=s/sourceforge/iij.dl.sourceforge/;s/downloads\///;s/projects\///;s/gz\//gz/,\
 uversionmangle=s/-beta/~beta/;s/-rc/~rc/;s/-preview/~preview/" \
- http://sourceforge.jp/projects/scim-imengine/releases/?package_id=3104 \
- /projects/scim-imengine/downloads/.*/scim-anthy-(1\.2\..*)\.tar.gz/ debian uupdate
+ http://sourceforge.jp/projects/scim-imengine/releases/ \
+ /projects/scim-imengine/downloads/.*/scim-anthy-(1\.2.*)\.tar.gz/ debian uupdate
