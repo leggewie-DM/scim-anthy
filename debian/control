@@ -9,7 +9,7 @@ Vcs-Browser: http://git.debian.org/?p=collab-maint/scim-anthy.git
 Vcs-Git: git://git.debian.org/collab-maint/scim-anthy.git
 Build-Depends: debhelper (>= 7.0.50~), libanthy-dev,
  scim (>= 1.4.6), libscim-dev (>= 1.4.6), autotools-dev, pkg-config
-Standards-Version: 3.8.2
+Standards-Version: 3.8.4
 
 Package: scim-anthy
 Architecture: any
