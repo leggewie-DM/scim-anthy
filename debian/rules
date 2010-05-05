@@ -17,3 +17,6 @@ override_dh_install:
 override_dh_installchangelogs:
 	dh_installchangelogs ChangeLog
 	dh_installchangelogs
+
+override_dh_makeshlibs:
+
