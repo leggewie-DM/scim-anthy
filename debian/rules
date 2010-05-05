@@ -3,12 +3,12 @@
 %:
 	dh $@
 
-override_dh_build:
-	dh_build
+override_dh_auto_build:
+	dh_auto_build
 	$(MAKE) update-gmo -C po
 
-override_dh_install:
-	dh_install
+override_dh_auto_install:
+	dh_auto_install
 	mv $(CURDIR)/debian/scim-anthy/usr/lib/scim-1.0/`pkg-config --variable=scim_binary_version scim`/IMEngine/anthy.a \
 	   $(CURDIR)/debian/scim-anthy/usr/lib/scim-1.0/`pkg-config --variable=scim_binary_version scim`/IMEngine/libanthy.a
 	mv $(CURDIR)/debian/scim-anthy/usr/lib/scim-1.0/`pkg-config --variable=scim_binary_version scim`/SetupUI/anthy-imengine-setup.a \
