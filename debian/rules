@@ -5,7 +5,7 @@
 
 override_dh_auto_build:
 	dh_auto_build
-	$(MAKE) update-gmo -C po
+	dh_auto_build -- update-gmo -C po
 
 override_dh_auto_install:
 	dh_auto_install
@@ -16,7 +16,6 @@ override_dh_auto_install:
 
 override_dh_installchangelogs:
 	dh_installchangelogs ChangeLog
-	dh_installchangelogs
 
 override_dh_makeshlibs:
 
