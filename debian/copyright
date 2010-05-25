@@ -1,5 +1,5 @@
-This package was debianized by Ikuya Awashiro <ikuya@oooug.jp> on
-Tue, 16 Nov 2004 16:18:17 +0900.
+This package was initially debianized by Ikuya Awashiro <ikuya@oooug.jp>
+on Tue, 16 Nov 2004 16:18:17 +0900.
 
 It was downloaded from http://sourceforge.jp/projects/scim-imengine/
 
@@ -16,3 +16,5 @@ License:
  On Debian systems, the complete text of the GNU General Public
  License can be found in the file `/usr/share/common-licenses/GPL'.
 
+ The Debian packaging is © 2004-2009 Ikuya Awashiro <ikuya@oooug.jp> and
+ © 2009-2010 Rolf Leggewie and released under the GPL v2 or later.
