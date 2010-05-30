@@ -14,8 +14,5 @@ override_dh_auto_install:
 	mv $(CURDIR)/debian/scim-anthy/usr/lib/scim-1.0/`pkg-config --variable=scim_binary_version scim`/SetupUI/anthy-imengine-setup.a \
 	   $(CURDIR)/debian/scim-anthy/usr/lib/scim-1.0/`pkg-config --variable=scim_binary_version scim`/SetupUI/libanthy-imengine-setup.a
 
-override_dh_installchangelogs:
-	dh_installchangelogs ChangeLog
-
 override_dh_makeshlibs:
 
