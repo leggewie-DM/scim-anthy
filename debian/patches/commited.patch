@@ -1,0 +1,36 @@
+Description: spell s/commited/committed/
+From: Osamu Aoki <osamu@debian.org>
+
+--- a/po/de.po
++++ b/po/de.po
+@@ -1124,7 +1124,7 @@
+ msgstr "Tasten zum zurückkonvertieren wählen"
+ 
+ #: src/scim_anthy_prefs.cpp:732
+-msgid "The key events to reconvert the commited string in selection. "
++msgid "The key events to reconvert the committed string in selection. "
+ msgstr ""
+ "Die Tastatureignisse, die die übergebene Zeichenkette wieder in eine Auswahl "
+ "zurückkonvertieren"
+--- a/po/ja.po
++++ b/po/ja.po
+@@ -1066,7 +1066,7 @@
+ msgstr "再変換キーの設定"
+ 
+ #: src/scim_anthy_prefs.cpp:732
+-msgid "The key events to reconvert the commited string in selection. "
++msgid "The key events to reconvert the committed string in selection. "
+ msgstr "セレクション内の確定済み文字列を再変換するキーイベント"
+ 
+ #: src/scim_anthy_prefs.cpp:741
+--- a/src/scim_anthy_prefs.cpp
++++ b/src/scim_anthy_prefs.cpp
+@@ -729,7 +729,7 @@
+         SCIM_ANTHY_CONFIG_RECONVERT_KEY_DEFAULT,
+         N_("Reconvert"),
+         N_("Select reconvert keys"),
+-        N_("The key events to reconvert the commited string in selection. "),
++        N_("The key events to reconvert the committed string in selection. "),
+         NULL,
+         false,
+     },
