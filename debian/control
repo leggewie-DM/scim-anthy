@@ -4,12 +4,12 @@ Priority: optional
 Maintainer: Ikuya Awashiro <ikuya@oooug.jp>
 Uploaders: Rolf Leggewie <foss@rolf.leggewie.biz>
 DM-Upload-Allowed: yes
-Homepage: http://scim-imengine.sourceforge.jp/
-Vcs-Browser: http://git.debian.org/?p=collab-maint/scim-anthy.git
-Vcs-Git: git://git.debian.org/collab-maint/scim-anthy.git
 Build-Depends: debhelper (>= 7.0.50~), libanthy-dev,
  scim (>= 1.4.6), libscim-dev (>= 1.4.6), autotools-dev, pkg-config
 Standards-Version: 3.8.4
+Homepage: http://scim-imengine.sourceforge.jp/
+Vcs-Git: git://git.debian.org/collab-maint/scim-anthy.git
+Vcs-Browser: http://git.debian.org/?p=collab-maint/scim-anthy.git
 
 Package: scim-anthy
 Architecture: any
