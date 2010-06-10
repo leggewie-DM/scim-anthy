@@ -1,9 +1,17 @@
 #!/usr/bin/make -f
+export DH_VERBOSE=1
+export DH_OPTIONS=-v
 
 %:
-	dh --with autotools-dev $@
+	dh --with autotools-dev --with autoreconf $@
+
+# If --with autoreconf is not available, uncoment line
+# with "autoreconf -i -f" while 
+# debian/control: Build-Depends: entry "dh-autoreconf" replaced
+# by "perl, debhelper, autoconf, automake | automaken, libtool".
 
 override_dh_auto_configure:
+#	autoreconf
 	dh_auto_configure -- --disable-static
 
 override_dh_auto_build:
@@ -16,3 +24,5 @@ override_dh_auto_install:
 	dh_auto_install
 	# these are not used.
 	rm debian/scim-anthy/usr/lib/scim-1.0/*/*/*.la
+
+# vim:textwidth=0:
