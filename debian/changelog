@@ -1,3 +1,16 @@
+scim-anthy (1.2.7-4) unstable; urgency=low
+
+  [ Tz-Huan Huang ]
+  * make scim-anthy build-able with gtk3. Closes: #677408
+
+  [ Rolf Leggewie ]
+  * debian/copyright: update my copyright
+  * debian/control:
+    - bump to latest standard
+    - update homepage field. Closes: #649879
+
+ -- Rolf Leggewie <foss@rolf.leggewie.biz>  Sat, 30 Jun 2012 13:42:22 +0800
+
 scim-anthy (1.2.7-3) unstable; urgency=low
 
   * debian/rules: drop installchangelogs override
