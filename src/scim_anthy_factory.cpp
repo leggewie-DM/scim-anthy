@@ -2,6 +2,7 @@
 /*
  *  Copyright (C) Hiroyuki Ikezoe <poincare@ikezoe.net>
  *  Copyright (C) 2004 Takuro Ashie <ashie@homa.ne.jp>
+ *  Copyright (C) 2007 Takashi Nakamoto <bluedwarf@bpost.plala.or.jp>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -64,21 +65,13 @@ extern "C" {
 
     void scim_module_exit (void)
     {
-        anthy_quit ();
         _scim_config.reset ();
     }
 
     uint32 scim_imengine_module_init (const ConfigPointer &config)
     {
         SCIM_DEBUG_IMENGINE(1) << "Initialize Anthy Engine.\n";
-
         _scim_config = config;
-
-        if (anthy_init ()) {
-            SCIM_DEBUG_IMENGINE(1) << "Failed to initialize Anthy Library!\n";
-            return 0;
-        }
-
         return 1;
     }
 
@@ -139,6 +132,8 @@ AnthyFactory::AnthyFactory (const String &lang,
       m_show_dict_label             (SCIM_ANTHY_CONFIG_SHOW_DICT_LABEL_DEFAULT),
       m_show_dict_admin_label       (SCIM_ANTHY_CONFIG_SHOW_DICT_ADMIN_LABEL_DEFAULT),
       m_show_add_word_label         (SCIM_ANTHY_CONFIG_SHOW_ADD_WORD_LABEL_DEFAULT),
+      m_show_tray_icon              (SCIM_ANTHY_CONFIG_SHOW_TRAY_ICON_DEFAULT),
+      m_use_custom_lookup_window    (SCIM_ANTHY_CONFIG_USE_CUSTOM_LOOKUP_WINDOW_DEFAULT),
       m_preedit_style               (SCIM_ANTHY_CONFIG_PREEDIT_STYLE_DEFAULT),
       m_conversion_style            (SCIM_ANTHY_CONFIG_CONVERSION_STYLE_DEFAULT),
       m_selected_segment_style      (SCIM_ANTHY_CONFIG_SELECTED_SEGMENT_STYLE_DEFAULT),
@@ -195,6 +190,7 @@ AnthyFactory::get_authors () const
         _("Authors of scim-anthy:\n"
           "  Copyright (C) 2004,2005 Takuro Ashie <ashie@homa.ne.jp>\n"
           "  Copyright (C) 2004,2005 Hiroyuki Ikezoe <poincare@ikezoe.net>\n"
+          "  Copyright (C) 2006,2007 Takashi Nakamoto <bluedwarf@bpost.plala.or.jp>\n"
           "  \n"
           "Authors of Anthy:\n"
           "  Copyright (C) 2000-2005 Yusuke TABATA <yusuke@w5.dion.ne.jp>\n"
@@ -211,7 +207,7 @@ AnthyFactory::get_credits () const
         _("Art work:\n"
           "  SHIMODA Hiroshi <piro@p.club.ne.jp>\n"
           "\n"
-          "Translation:\n"
+          "Translate:\n"
           "  Gerrit Sangel <z0idberg@gmx.de>"
           "\n"
           "Special thanks:\n"
@@ -246,8 +242,8 @@ AnthyFactory::get_help () const
     const char *text2 = 
         _("2. Input Japanese hiragana and katakana:\n"
           "  You can input Japanese hiragana and katakana by inputting romaji.\n"
-          "  The Romaji table can be found out from the \"Anthy\" section of the setup\n"
-          "  window in SCIM or SKIM.\n"
+          "  Romaji table will be find out from \"Anthy\" section on a setup window of\n"
+          "  SCIM or SKIM.\n"
           "  If you want to hiragana and katakana directly by using Japanese keyboard,\n"
           "  please press Alt + Romaji key or Conrol+\\ key to switch typing method.\n"
           "  \n");
@@ -256,10 +252,10 @@ AnthyFactory::get_help () const
         _("3. Convert hiragana or katakana to Japanese kanji\n"
           "  After inputting hiragana or katakana, you can convert it to Japanese\n"
           "  kanji by pressing Space key. Then it will show some candidates. You can\n"
-          "  select the next candidate by pressing Space key, and can commit it by\n"
+          "  select a next candidate by pressing Space key, and can commit it by\n"
           "  pressing Enter key.\n"
           "  If you input a sentense, Anthy will split it to some segments. You can\n"
-          "  select the next or previous segment by pressing left or right cursor key,\n"
+          "  select a next or previous segment by pressing left or right cursor key,\n"
           "  and can extend or shrink the selected segment by pressing Shift + left or\n"
           "  right cursor key.\n"
           "  \n");
@@ -542,6 +538,10 @@ AnthyFactory::reload_config (const ConfigPointer &config)
             = config->read (String (SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND),
                             String (SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND_DEFAULT));
 
+        m_add_word_command_yomi_option
+            = config->read (String (SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND_YOMI_OPTION),
+                            String (SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND_YOMI_OPTION_DEFAULT));
+
         m_predict_on_input
             = config->read (String (SCIM_ANTHY_CONFIG_PREDICT_ON_INPUT),
                             SCIM_ANTHY_CONFIG_PREDICT_ON_INPUT_DEFAULT);
@@ -581,6 +581,14 @@ AnthyFactory::reload_config (const ConfigPointer &config)
         m_show_add_word_label
             = config->read (String (SCIM_ANTHY_CONFIG_SHOW_ADD_WORD_LABEL),
                             SCIM_ANTHY_CONFIG_SHOW_ADD_WORD_LABEL_DEFAULT);
+
+        m_show_tray_icon
+            = config->read (String (SCIM_ANTHY_CONFIG_SHOW_TRAY_ICON),
+                            SCIM_ANTHY_CONFIG_SHOW_TRAY_ICON_DEFAULT);
+
+        m_use_custom_lookup_window
+            = config->read (String (SCIM_ANTHY_CONFIG_USE_CUSTOM_LOOKUP_WINDOW),
+                            SCIM_ANTHY_CONFIG_USE_CUSTOM_LOOKUP_WINDOW_DEFAULT);
 
     	// color settings
         int red, green, blue;

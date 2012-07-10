@@ -101,41 +101,45 @@ static void     on_nicola_table_editor_removed_entry (ScimAnthyTableEditor *edit
 GtkWidget *
 kana_page_create_ui (void)
 {
-    GtkWidget *vbox;
+    GtkWidget *vbox, *hbox, *label;
 
     vbox = gtk_vbox_new (FALSE, 0);
+    gtk_container_set_border_width (GTK_CONTAINER(vbox), 8);
     gtk_widget_show (vbox);
 
+    GtkWidget *table = gtk_table_new (8, 4, FALSE);
+    gtk_box_pack_start (GTK_BOX (vbox), table, FALSE, FALSE, 4);
+    gtk_widget_show (table);
+
     // JIS Kana Layout
-    GtkWidget *hbox = gtk_hbox_new (FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 4);
-    gtk_widget_show (hbox);
-
-    GtkWidget *label = gtk_label_new (_("<b>JIS Kana Layout</b>"));
-    gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 4);
-    gtk_widget_show (label);
-
-    GtkWidget *alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
-    gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 0, 8, 24, 0);
-    gtk_box_pack_start (GTK_BOX (vbox), alignment, FALSE, FALSE, 0);
-    gtk_widget_show (alignment);
+    create_subgroup_label (_("<b>JIS Kana Layout</b>"),
+                           GTK_TABLE (table), 0);
 
     /* kana table */
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_container_set_border_width (GTK_CONTAINER (hbox), 4);
-    gtk_container_add (GTK_CONTAINER (alignment), hbox);
-    gtk_widget_show(hbox);
+    GtkWidget *alignment = gtk_alignment_new (0.0, 0.5, 1.0, 1.0);
+    gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 0, 0, 20, 0);
+    gtk_table_attach (GTK_TABLE (table), alignment, 0, 1, 1, 2,
+                      (GtkAttachOptions) GTK_FILL,
+                      (GtkAttachOptions) GTK_FILL,
+                      4, 4);
+    gtk_widget_show (alignment);
 
     label = gtk_label_new_with_mnemonic (_("La_yout:"));
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+    gtk_misc_set_padding (GTK_MISC (label), 4, 0);
+    gtk_container_add (GTK_CONTAINER (alignment), label);
     gtk_widget_show (label);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), 4);
+    gtk_table_attach_defaults (GTK_TABLE (table), hbox, 1, 4, 1, 2);
+    gtk_widget_show(hbox);
 
     GtkWidget *omenu = gtk_option_menu_new ();
     __widget_kana_layout_menu = omenu;
     g_signal_connect (G_OBJECT (omenu), "changed",
                       G_CALLBACK (on_kana_layout_menu_changed), NULL);
-    gtk_box_pack_start (GTK_BOX (hbox), omenu, FALSE, FALSE, 2);
+    gtk_box_pack_start (GTK_BOX (hbox), omenu, TRUE, TRUE, 2);
     gtk_widget_show (omenu);
 
     gtk_label_set_mnemonic_widget (GTK_LABEL(label), omenu);
@@ -147,40 +151,46 @@ kana_page_create_ui (void)
     gtk_widget_show (button);
 
 
-    // Thumb Shift Layout
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 4);
-    gtk_widget_show (hbox);
-
-    label = gtk_label_new (_("<b>Thumb Shift Layout</b>"));
-    gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 4);
+    // padding
+    label = gtk_alignment_new (0.0, 0.0, 1.0, 1.0);
+    gtk_alignment_set_padding (GTK_ALIGNMENT (label), 2, 2, 0, 0);
+    gtk_table_attach (GTK_TABLE (table), label,
+                      0, 4, 2, 3,
+                      (GtkAttachOptions) GTK_FILL,
+                      (GtkAttachOptions) GTK_FILL,
+                      4, 4);
     gtk_widget_show (label);
 
-    alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
-    gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 0, 0, 24, 0);
-    gtk_box_pack_start (GTK_BOX (vbox), alignment, FALSE, FALSE, 0);
-    gtk_widget_show (alignment);
 
-    GtkWidget *vbox2 = gtk_vbox_new (FALSE, 0);
-    gtk_container_add (GTK_CONTAINER (alignment), vbox2);
-    gtk_widget_show (vbox2);
+    // Thumb Shift Layout
+    create_subgroup_label (_("<b>Thumb Shift Layout</b>"),
+                           GTK_TABLE (table), 3);
 
     /* nicola table */
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_container_set_border_width (GTK_CONTAINER (hbox), 4);
-    gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-    gtk_widget_show(hbox);
+    alignment = gtk_alignment_new (0.0, 0.5, 1.0, 1.0);
+    gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 0, 0, 20, 0);
+    gtk_table_attach (GTK_TABLE (table), alignment, 0, 1, 4, 5,
+                      (GtkAttachOptions) GTK_FILL,
+                      (GtkAttachOptions) GTK_FILL,
+                      4, 4);
+    gtk_widget_show (alignment);
 
     label = gtk_label_new_with_mnemonic (_("La_yout:"));
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+    gtk_misc_set_padding (GTK_MISC (label), 4, 0);
+    gtk_container_add (GTK_CONTAINER (alignment), label);
     gtk_widget_show (label);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), 4);
+    gtk_table_attach_defaults (GTK_TABLE (table), hbox, 1, 4, 4, 5);
+    gtk_widget_show(hbox);
 
     omenu = gtk_option_menu_new ();
     __widget_nicola_layout_menu = omenu;
     g_signal_connect (G_OBJECT (omenu), "changed",
                       G_CALLBACK (on_nicola_layout_menu_changed), NULL);
-    gtk_box_pack_start (GTK_BOX (hbox), omenu, FALSE, FALSE, 2);
+    gtk_box_pack_start (GTK_BOX (hbox), omenu, TRUE, TRUE, 2);
     gtk_widget_show (omenu);
 
     gtk_label_set_mnemonic_widget (GTK_LABEL(label), omenu);
@@ -193,30 +203,29 @@ kana_page_create_ui (void)
 
     /* thumb shift keys */
     hbox = gtk_hbox_new (FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
     gtk_widget_show (hbox);
-
-    GtkWidget *table = gtk_table_new (2, 2, FALSE);
-    gtk_box_pack_start (GTK_BOX (vbox2), table, FALSE, FALSE, 4);
-    gtk_widget_show (table);
 
     // left
     GtkWidget *widget = create_entry (SCIM_ANTHY_CONFIG_LEFT_THUMB_SHIFT_KEY,
-                                      GTK_TABLE (table), 0);
+                                      GTK_TABLE (table), 5);
+    set_left_padding (widget, 20);
     gtk_entry_set_editable (GTK_ENTRY (widget), FALSE);
     widget = create_key_select_button (SCIM_ANTHY_CONFIG_LEFT_THUMB_SHIFT_KEY,
-                                       GTK_TABLE (table), 0);
+                                       GTK_TABLE (table), 5);
 
     // right
     widget = create_entry (SCIM_ANTHY_CONFIG_RIGHT_THUMB_SHIFT_KEY,
-                           GTK_TABLE (table), 1);
+                           GTK_TABLE (table), 6);
+    set_left_padding (widget, 20);
     gtk_entry_set_editable (GTK_ENTRY (widget), FALSE);
     widget = create_key_select_button (SCIM_ANTHY_CONFIG_RIGHT_THUMB_SHIFT_KEY,
-                                       GTK_TABLE (table), 1);
+                                       GTK_TABLE (table), 6);
 
     /* NICOLA time */
-    create_spin_button (SCIM_ANTHY_CONFIG_NICOLA_TIME,
-                        GTK_TABLE (table), 3);
+    widget = create_spin_button (SCIM_ANTHY_CONFIG_NICOLA_TIME,
+                                 GTK_TABLE (table), 7);
+    set_left_padding (widget, 20);
 
     // prepare
     setup_kana_page ();
@@ -267,7 +276,7 @@ create_kana_window (GtkWindow *parent)
     gtk_window_set_transient_for (GTK_WINDOW (dialog),
                                   GTK_WINDOW (parent));
     gtk_window_set_title (GTK_WINDOW (dialog),
-                          _("Customize kana layout table"));
+                          _("Customize Kana Layout Table"));
 
     // option menu area
     GtkWidget *hbox = gtk_hbox_new (FALSE, 0);
@@ -339,7 +348,7 @@ create_nicola_window (GtkWindow *parent)
     gtk_window_set_transient_for (GTK_WINDOW (dialog),
                                   GTK_WINDOW (parent));
     gtk_window_set_title (GTK_WINDOW (dialog),
-                          _("Customize thumb shift layout table"));
+                          _("Customize Thumb Shift Layout Table"));
 
     // option menu area
     GtkWidget *hbox = gtk_hbox_new (FALSE, 0);

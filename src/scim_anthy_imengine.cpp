@@ -2,6 +2,7 @@
 /*
  *  Copyright (C) 2004 - 2005 Hiroyuki Ikezoe <poincare@ikezoe.net>
  *  Copyright (C) 2004 - 2005 Takuro Ashie <ashie@homa.ne.jp>
+ *  Copyright (C) 2006 - 2007 Takashi Nakamoto <bluedwarf@bpost.plala.or.jp>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +29,9 @@
 #define Uses_SCIM_LOOKUP_TABLE
 #define Uses_SCIM_CONFIG_BASE
 
+#define Uses_STL_VECTOR
+#define Uses_STL_ALGORITHM
+
 #ifdef HAVE_CONFIG_H
   #include <config.h>
 #endif
@@ -42,7 +46,7 @@
 #include "scim_anthy_prefs.h"
 #include "scim_anthy_intl.h"
 #include "scim_anthy_utils.h"
-#include "scim_anthy_helper.h"
+#include "scim_anthy_diction.h"
 
 #define SCIM_PROP_PREFIX                     "/IMEngine/Anthy"
 #define SCIM_PROP_INPUT_MODE                 "/IMEngine/Anthy/InputMode"
@@ -99,6 +103,7 @@ AnthyInstance::AnthyInstance (AnthyFactory   *factory,
       m_preedit_string_visible (false),
       m_lookup_table_visible   (false),
       m_n_conv_key_pressed     (0),
+      m_diction_service        (m_factory->m_config),
       m_prev_input_mode        (SCIM_ANTHY_MODE_HIRAGANA),
       m_conv_mode              (SCIM_ANTHY_CONVERSION_MULTI_SEGMENT),
       m_helper_started         (false),
@@ -147,10 +152,10 @@ AnthyInstance::process_key_event_input (const KeyEvent &key)
         m_preedit.get_candidates (table);
         if (table.number_of_candidates () > 0) {
             table.show_cursor (false);
-            update_lookup_table (table);
-            show_lookup_table ();
+            update_lookup_table_advanced (table);
+            show_lookup_table_advanced ();
         } else {
-            hide_lookup_table ();
+            hide_lookup_table_advanced ();
         }
     }
 
@@ -335,7 +340,7 @@ AnthyInstance::select_candidate_no_direct (unsigned int item)
 
     // update lookup table
     m_lookup_table.set_cursor_pos_in_current_page (item);
-    update_lookup_table (m_lookup_table);
+    update_lookup_table_advanced (m_lookup_table);
 
     // update preedit
     m_preedit.select_candidate (m_lookup_table.get_cursor_pos ());
@@ -380,7 +385,7 @@ AnthyInstance::lookup_table_page_up ()
 
     m_lookup_table.page_up ();
 
-    update_lookup_table (m_lookup_table);
+    update_lookup_table_advanced (m_lookup_table);
 }
 
 void
@@ -397,7 +402,7 @@ AnthyInstance::lookup_table_page_down ()
 
     m_lookup_table.page_down ();
 
-    update_lookup_table (m_lookup_table);
+    update_lookup_table_advanced (m_lookup_table);
 }
 
 void
@@ -409,6 +414,10 @@ AnthyInstance::reset ()
     m_lookup_table.clear ();
     unset_lookup_table ();
 
+    hide_lookup_table_advanced ();
+    hide_aux_string_advanced ();
+    hide_note ();
+
     hide_preedit_string ();
     m_preedit_string_visible = false;
     set_preedition ();
@@ -418,6 +427,9 @@ void
 AnthyInstance::focus_in ()
 {
     SCIM_DEBUG_IMENGINE(2) << "focus_in.\n";
+
+    hide_aux_string_advanced ();
+    hide_note ();
 
     if (m_preedit_string_visible) {
         set_preedition ();
@@ -431,15 +443,14 @@ AnthyInstance::focus_in ()
             m_lookup_table.number_of_candidates() > 0)
         {
             set_aux_string ();
-            show_aux_string ();
+            show_aux_string_advanced ();
         } else {
             hide_aux_string ();
         }
-        update_lookup_table (m_lookup_table);
-        show_lookup_table ();
+        update_lookup_table_advanced (m_lookup_table);
+        show_lookup_table_advanced ();
     } else {
-        hide_aux_string ();
-        hide_lookup_table ();
+        hide_lookup_table_advanced ();
     }
 
     install_properties ();
@@ -448,7 +459,6 @@ AnthyInstance::focus_in ()
         start_helper (String (SCIM_ANTHY_HELPER_UUID));
 
     Transaction send;
-    send.put_command (SCIM_TRANS_CMD_REQUEST);
     send.put_command (SCIM_TRANS_CMD_FOCUS_IN);
     send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
 }
@@ -468,7 +478,6 @@ AnthyInstance::focus_out ()
     }
 
     Transaction send;
-    send.put_command (SCIM_TRANS_CMD_REQUEST);
     send.put_command (SCIM_TRANS_CMD_FOCUS_OUT);
     send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
 }
@@ -488,7 +497,7 @@ AnthyInstance::set_aux_string (void)
     sprintf (buf, _("Candidates (%d/%d)"),
              m_lookup_table.get_cursor_pos () + 1,
              m_lookup_table.number_of_candidates ());
-    update_aux_string (utf8_mbstowcs (buf));
+    update_aux_string_advanced (utf8_mbstowcs (buf));
 }
 
 void
@@ -514,7 +523,7 @@ AnthyInstance::set_lookup_table (void)
             return;
 
         // set position
-        update_lookup_table (m_lookup_table);
+        update_lookup_table_advanced (m_lookup_table);
 
         // update preedit
         m_preedit.select_candidate (m_lookup_table.get_cursor_pos ());
@@ -529,16 +538,48 @@ AnthyInstance::set_lookup_table (void)
     if (!m_lookup_table_visible &&
         (m_preedit.is_predicting () || beyond_threshold))
     {
-        show_lookup_table ();
+        show_lookup_table_advanced ();
         m_lookup_table_visible = true;
         m_n_conv_key_pressed = 0;
 
         if (m_factory->m_show_candidates_label) {
             set_aux_string ();
-            show_aux_string ();
+            show_aux_string_advanced ();
+
+            // find diction
+            int start = m_lookup_table.get_current_page_start ();
+            int end = m_lookup_table.get_current_page_size ();
+            WideString note;
+            std::vector< WideString > candidates;
+            std::vector< AnthyDiction > dictions;
+            for (int i = start; i < end; i++)
+                candidates.push_back (m_lookup_table.get_candidate (i));
+
+            m_diction_service.get_dictions (candidates, dictions);
+
+            for (unsigned int i = 0; i < dictions.size (); i++)
+            {
+                note += dictions[i].get_end_form ();
+                note += utf8_mbstowcs (":\n");
+                note += dictions[i].get_diction ();
+                if( (i+1) != dictions.size() )
+                    note += utf8_mbstowcs ("\n\n");
+            }
+
+            // show diction if it exists
+            if (note.size () != 0)
+            {
+                update_note (note);
+                show_note ();
+            }
+            else
+            {
+                update_note (utf8_mbstowcs (""));
+                hide_note ();
+            }
         }
     } else if (!m_lookup_table_visible) {
-        hide_lookup_table ();
+        hide_lookup_table_advanced ();
     }
 }
 
@@ -546,12 +587,15 @@ void
 AnthyInstance::unset_lookup_table (void)
 {
     m_lookup_table.clear ();
-    hide_lookup_table ();
+    hide_lookup_table_advanced ();
     m_lookup_table_visible = false;
     m_n_conv_key_pressed = 0;
 
-    update_aux_string (utf8_mbstowcs (""));
-    hide_aux_string ();
+    update_aux_string_advanced (utf8_mbstowcs (""));
+    hide_aux_string_advanced ();
+
+    update_note (utf8_mbstowcs (""));
+    hide_note ();
 }
 
 void
@@ -608,7 +652,7 @@ AnthyInstance::install_properties (void)
         if (m_factory->m_show_conv_mode_label) {
             prop = Property (SCIM_PROP_CONV_MODE,
                              "\xE9\x80\xA3", String (""),
-                             _("Conversion mode"));
+                             _("Conversion method"));
             m_properties.push_back (prop);
 
             prop = Property (SCIM_PROP_CONV_MODE_MULTI_SEG,
@@ -729,7 +773,7 @@ AnthyInstance::install_properties (void)
                 prop = Property (SCIM_PROP_DICT_ADD_WORD,
                                  _("Add a word"),
                                  String (SCIM_ICONDIR "/" "scim-anthy-dict.png"),
-                                 _("Add a word to the dictionary."));
+                                 _("Add a word to the dictorinay."));
                 m_properties.push_back (prop);
             }
         }
@@ -744,12 +788,198 @@ AnthyInstance::install_properties (void)
                       m_preedit.get_slash_style ());
 
     register_properties (m_properties);
+
+    // for tray menu
+    if (m_tray_properties.size () <= 0) {
+        Property prop;
+
+        // input mode
+        prop = Property (SCIM_PROP_INPUT_MODE,
+                         _("Input mode"), String (""), _("Input mode"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_INPUT_MODE_HIRAGANA,
+                         _("Hiragana"), String (""), _("Hiragana"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_INPUT_MODE_KATAKANA,
+                         _("Katakana"), String (""), _("Katakana"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_INPUT_MODE_HALF_KATAKANA,
+                         _("Half width katakana"), String (""),
+                         _("Half width katakana"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_INPUT_MODE_LATIN,
+                         _("Latin"), String (""), _("Direct input"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_INPUT_MODE_WIDE_LATIN,
+                         _("Wide latin"), String (""), _("Wide latin"));
+        m_tray_properties.push_back (prop);
+
+        // typing method
+        prop = Property (SCIM_PROP_TYPING_METHOD,
+                         _("Typing method"), String (""), _("Typing method"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_TYPING_METHOD_ROMAJI,
+                         _("Romaji"), String (""), _("Romaji"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_TYPING_METHOD_KANA,
+                         _("Kana"), String (""), _("Kana"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_TYPING_METHOD_NICOLA,
+                         _("Thumb shift"), String (""), _("Thumb shift"));
+        m_tray_properties.push_back (prop);
+
+        // conversion method
+        prop = Property (SCIM_PROP_CONV_MODE,
+                         _("Conversion method"), String (""),
+                         _("Conversion method"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_CONV_MODE_MULTI_SEG,
+                         _("Multi segment"), String (""),
+                         _("Multi segment"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_CONV_MODE_SINGLE_SEG,
+                         _("Single segment"), String (""),
+                         _("Single segment"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_CONV_MODE_MULTI_REAL_TIME,
+                         _("Convert as you type (Multi segment)"),
+                         String (""),
+                         _("Convert as you type (Multi segment)"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_CONV_MODE_SINGLE_REAL_TIME,
+                         _("Convert as you type (Single segment)"),
+                         String (""),
+                         _("Convert as you type (Single segment)"));
+        m_tray_properties.push_back (prop);
+
+        // period style
+        prop = Property (SCIM_PROP_PERIOD_STYLE,
+                         _("Period style"), String (""),
+                         _("Period style"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_PERIOD_STYLE_JAPANESE,
+                         "\xE3\x80\x81\xE3\x80\x82", String (""),
+                         "\xE3\x80\x81\xE3\x80\x82");
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_PERIOD_STYLE_WIDE_LATIN_JAPANESE,
+                         "\xEF\xBC\x8C\xE3\x80\x82", String (""),
+                         "\xEF\xBC\x8C\xE3\x80\x82");
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_PERIOD_STYLE_WIDE_LATIN,
+                         "\xEF\xBC\x8C\xEF\xBC\x8E", String (""),
+                         "\xEF\xBC\x8C\xEF\xBC\x8E");
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_PERIOD_STYLE_LATIN,
+                         ",.", String (""), ",.");
+        m_tray_properties.push_back (prop);
+
+        // symbol style
+        prop = Property (SCIM_PROP_SYMBOL_STYLE,
+                         _("Symbol style"),
+                         String (""),
+                         _("Symbol style"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_SYMBOL_STYLE_JAPANESE,
+                         UTF8_BRACKET_CORNER_BEGIN
+                         UTF8_BRACKET_CORNER_END
+                         UTF8_MIDDLE_DOT,
+                         String (""),
+                         UTF8_BRACKET_CORNER_BEGIN
+                         UTF8_BRACKET_CORNER_END
+                         UTF8_MIDDLE_DOT);
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_SYMBOL_STYLE_CORNER_BRACKET_SLASH,
+                         UTF8_BRACKET_CORNER_BEGIN
+                         UTF8_BRACKET_CORNER_END
+                         UTF8_SLASH_WIDE,
+                         String (""),
+                         UTF8_BRACKET_CORNER_BEGIN
+                         UTF8_BRACKET_CORNER_END
+                         UTF8_SLASH_WIDE);
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_SYMBOL_STYLE_BRACKET_MIDDLE_DOT,
+                         UTF8_BRACKET_WIDE_BEGIN
+                         UTF8_BRACKET_WIDE_END
+                         UTF8_MIDDLE_DOT,
+                         String (""),
+                         UTF8_BRACKET_WIDE_BEGIN
+                         UTF8_BRACKET_WIDE_END
+                         UTF8_MIDDLE_DOT);
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_SYMBOL_STYLE_BRACKET_SLASH,
+                         UTF8_BRACKET_WIDE_BEGIN
+                         UTF8_BRACKET_WIDE_END
+                         UTF8_SLASH_WIDE,
+                         String (""),
+                         UTF8_BRACKET_WIDE_BEGIN
+                         UTF8_BRACKET_WIDE_END
+                         UTF8_SLASH_WIDE);
+        m_tray_properties.push_back (prop);
+
+        // dictionary
+        prop = Property (SCIM_PROP_DICT,
+                         _("Dictionary"),
+                         String (SCIM_ICONDIR "/" "scim-anthy-dict.png"),
+                         _("Dictionary menu"));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_DICT_LAUNCH_ADMIN_TOOL,
+                         _("Edit the dictionary"),
+                         String (SCIM_ICONDIR "/" "scim-anthy-dict.png"),
+                         _("Launch the dictionary administration tool."));
+        m_tray_properties.push_back (prop);
+
+        prop = Property (SCIM_PROP_DICT_ADD_WORD,
+                         _("Add a word"),
+                         String (SCIM_ICONDIR "/" "scim-anthy-dict.png"),
+                         _("Add a word to the dictorinay."));
+        m_tray_properties.push_back (prop);
+    }
+
+    if (m_factory->m_show_tray_icon) {
+        Transaction send;
+        send.put_command (SCIM_ANTHY_TRANS_CMD_INIT_TRAY_MENU);
+        send.put_data (m_tray_properties);
+        send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+    }
 }
 
 void
 AnthyInstance::set_input_mode (InputMode mode)
 {
     const char *label = "";
+
+    //Clear or commit current preedit text when exit Japanese mode.
+    if (m_preedit.is_preediting () &&
+        (mode == SCIM_ANTHY_MODE_LATIN || mode == SCIM_ANTHY_MODE_WIDE_LATIN))
+    {
+        if (m_factory->m_behavior_on_focus_out == "Clear")
+            reset ();
+        else if (m_factory->m_behavior_on_focus_out == "Commit")
+            action_commit (m_factory->m_learn_on_auto_commit);
+        else
+            action_commit (m_factory->m_learn_on_auto_commit);
+    }
 
     switch (mode) {
     case SCIM_ANTHY_MODE_HIRAGANA:
@@ -778,6 +1008,14 @@ AnthyInstance::set_input_mode (InputMode mode)
         if (it != m_properties.end ()) {
             it->set_label (label);
             update_property (*it);
+
+            if (m_factory->m_show_tray_icon)
+            {
+                Transaction send;
+                send.put_command (SCIM_ANTHY_TRANS_CMD_SET_INPUT_MODE);
+                send.put_data (mode);
+                send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+            }
         }
     }
 
@@ -2021,7 +2259,39 @@ AnthyInstance::action_reconvert (void)
 bool
 AnthyInstance::action_add_word (void)
 {
-    util_launch_program (m_factory->m_add_word_command.c_str ());
+    IConvert iconv("EUC-JP");
+    String yomi;
+    CommonLookupTable candidates;
+
+    // get yomi
+    if(m_preedit.is_converting())
+    {
+        m_preedit.get_candidates(candidates, m_preedit.get_selected_segment () );
+        if( candidates.number_of_candidates() >= 2 )
+        {
+            iconv.convert(yomi,
+                          candidates.get_candidate( candidates.number_of_candidates()  - 2 ));
+        }
+    }
+    else if(m_preedit.is_preediting())
+    {
+        iconv.convert(yomi, m_preedit.get_string());
+        reset();
+    }
+
+    if( m_factory->m_add_word_command_yomi_option.length() > 0 &&
+        yomi.length() > 0)
+    {
+        String command = m_factory->m_add_word_command;
+        command += String(" ") + m_factory->m_add_word_command_yomi_option;
+        command += String(" ") + yomi;
+        util_launch_program( command.c_str() );
+    }
+    else
+    {
+        util_launch_program (m_factory->m_add_word_command.c_str ());
+    }
+
 
     return true;
 }
@@ -2232,8 +2502,52 @@ AnthyInstance::process_helper_event (const String &helper_uuid,
         }
         break;
     }
-    default:
+    case SCIM_ANTHY_TRANS_CMD_ATTACHMENT_SUCCESS:
+    {
+        if (m_factory->m_show_tray_icon)
+        {
+            Transaction send;
+            send.put_command (SCIM_ANTHY_TRANS_CMD_SET_INPUT_MODE);
+            send.put_data (get_input_mode ());
+            send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);    
+
+            Transaction send2;
+            send2.put_command (SCIM_ANTHY_TRANS_CMD_INIT_TRAY_MENU);
+            send2.put_data (m_tray_properties);
+            send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send2);
+        }
+
         break;
+    }
+    case SCIM_ANTHY_TRANS_CMD_CHANGE_INPUT_MODE:
+    {
+        uint32 tmp;
+        reader.get_data (tmp);
+        set_input_mode ((InputMode) tmp);
+        break;
+    }
+    case SCIM_ANTHY_TRANS_CMD_TRIGGER_PROPERTY:
+    {
+        String key;
+        if (reader.get_data (key))
+            trigger_property (key);
+
+        break;
+    }
+    case SCIM_ANTHY_TRANS_CMD_SELECT_CANDIDATE:
+    {
+        uint32 n;
+        if (reader.get_data (n))
+        {
+            select_candidate (n);
+        }
+
+        break;
+    }
+    default:
+    {
+        break;
+    }
     }
 }
 
@@ -2333,10 +2647,14 @@ AnthyInstance::reload_config (const ConfigPointer &config)
 
     // setup toolbar
     m_properties.clear ();
+    m_tray_properties.clear ();
     install_properties ();
 
     // set encoding
     m_preedit.set_dict_encoding (m_factory->m_dict_encoding);
+
+    // set diction
+    m_diction_service.reload_config (config);
 }
 
 bool
@@ -2371,6 +2689,114 @@ AnthyInstance::get_pseudo_ascii_mode (void)
     }
 
     return retval;
+}
+
+void
+AnthyInstance::show_aux_string_advanced (void)
+{
+    if (m_factory->m_use_custom_lookup_window) {
+        Transaction send;
+        send.put_command (SCIM_TRANS_CMD_SHOW_AUX_STRING);
+        send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+    } else {
+        show_aux_string ();
+    }
+}
+
+void
+AnthyInstance::hide_aux_string_advanced (void)
+{
+    if (m_factory->m_use_custom_lookup_window) {
+        Transaction send;
+        send.put_command (SCIM_TRANS_CMD_HIDE_AUX_STRING);
+        send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+    } else {
+        hide_aux_string ();
+    }
+}
+
+void
+AnthyInstance::update_aux_string_advanced (const WideString &str,
+                                           const AttributeList &attrs)
+{
+    if (m_factory->m_use_custom_lookup_window) {
+        Transaction send;
+        send.put_command (SCIM_TRANS_CMD_UPDATE_AUX_STRING);
+        send.put_data (str);
+        send.put_data (attrs);
+        send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+    } else {
+        update_aux_string (str, attrs);
+    }
+}
+
+void
+AnthyInstance::show_lookup_table_advanced (void)
+{
+    if (m_factory->m_use_custom_lookup_window) {
+        Transaction send;
+        send.put_command (SCIM_TRANS_CMD_SHOW_LOOKUP_TABLE);
+        send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+    } else {
+        show_lookup_table ();
+    }
+}
+
+void
+AnthyInstance::hide_lookup_table_advanced (void)
+{
+    if (m_factory->m_use_custom_lookup_window) {
+        Transaction send;
+        send.put_command (SCIM_TRANS_CMD_HIDE_LOOKUP_TABLE);
+        send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+    } else {
+        hide_lookup_table ();
+    }
+}
+
+
+void
+AnthyInstance::update_lookup_table_advanced (const LookupTable &table)
+{
+    if (m_factory->m_use_custom_lookup_window) {
+        Transaction send;
+        send.put_command (SCIM_TRANS_CMD_UPDATE_LOOKUP_TABLE);
+        send.put_data (table);
+        send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+    } else {
+        update_lookup_table (table);
+    }
+}
+
+void
+AnthyInstance::show_note (void)
+{
+    if (m_factory->m_use_custom_lookup_window) {
+        Transaction send;
+        send.put_command (SCIM_ANTHY_TRANS_CMD_SHOW_NOTE);
+        send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+    }
+}
+
+void
+AnthyInstance::hide_note (void)
+{
+    if (m_factory->m_use_custom_lookup_window) {
+        Transaction send;
+        send.put_command (SCIM_ANTHY_TRANS_CMD_HIDE_NOTE);
+        send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+    }
+}
+
+void
+AnthyInstance::update_note (const WideString &str)
+{
+    if (m_factory->m_use_custom_lookup_window) {
+        Transaction send;
+        send.put_command (SCIM_ANTHY_TRANS_CMD_UPDATE_NOTE);
+        send.put_data (str);
+        send_helper_event (String (SCIM_ANTHY_HELPER_UUID), send);
+    }
 }
 
 /*

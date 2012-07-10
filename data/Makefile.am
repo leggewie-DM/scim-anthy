@@ -20,7 +20,13 @@ MAINTAINERCLEANFILES	= Makefile.in
 icondir			= $(SCIM_ICONDIR)
 icon_DATA		= scim-anthy.png \
 			  scim-anthy-dict.png \
-			  scim-anthy-swap-colors.png
+			  scim-anthy-swap-colors.png \
+			  scim-anthy-hiragana.png \
+			  scim-anthy-katakana.png \
+			  scim-anthy-halfkana.png \
+			  scim-anthy-halfwidth-alnum.png \
+			  scim-anthy-fullwidth-alnum.png \
+			  scim-anthy-direct.png
 
 styledir		= $(SCIM_ANTHY_DATADIR)/style
 style_DATA		= atok.sty \
@@ -31,11 +37,14 @@ style_DATA		= atok.sty \
 			  azik.sty \
 			  101kana.sty \
 			  nicola-a.sty \
-			  nicola-f.sty \
 			  nicola-j.sty \
 			  oasys100j.sty \
 			  tron-dvorak.sty \
 			  tron-qwerty-jp.sty \
 			  tsuki-2-203-101.sty \
 			  tsuki-2-203-106.sty
-EXTRA_DIST		= $(icon_DATA) $(style_DATA)
+
+dictiondir		= $(SCIM_ANTHY_DATADIR)
+diction_DATA		= diction conjugation
+
+EXTRA_DIST		= $(icon_DATA) $(style_DATA) $(diction_DATA)

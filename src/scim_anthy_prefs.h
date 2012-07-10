@@ -2,6 +2,7 @@
 /*
  *  Copyright (C) 2004 Hiroyuki Ikezoe
  *  Copyright (C) 2004 Takuro Ashie
+ *  Copyright (C) 2006 - 2007 Takashi Nakamoto <bluedwarf@bpost.plala.or.jp>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,12 +26,13 @@
 #define SCIM_ANTHY_CONFIG_INPUT_MODE                  "/IMEngine/Anthy/InputMode"
 #define SCIM_ANTHY_CONFIG_TYPING_METHOD               "/IMEngine/Anthy/TypingMethod"
 #define SCIM_ANTHY_CONFIG_CONVERSION_MODE             "/IMEngine/Anthy/ConversionMode"
+#define SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT       "/IMEngine/Anthy/BehaviorOnFocusOut"
+
 #define SCIM_ANTHY_CONFIG_PERIOD_STYLE                "/IMEngine/Anthy/PeriodStyle"
 #define SCIM_ANTHY_CONFIG_SYMBOL_STYLE                "/IMEngine/Anthy/SymbolStyle"
 #define SCIM_ANTHY_CONFIG_SPACE_TYPE                  "/IMEngine/Anthy/SpaceType"
 #define SCIM_ANTHY_CONFIG_TEN_KEY_TYPE                "/IMEngine/Anthy/TenKeyType"
 #define SCIM_ANTHY_CONFIG_BEHAVIOR_ON_PERIOD          "/IMEngine/Anthy/BehaviorOnPeriod"
-#define SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT       "/IMEngine/Anthy/BehaviorOnFocusOut"
 
 #define SCIM_ANTHY_CONFIG_ROMAJI_THEME_FILE           "/IMEngine/Anthy/RomajiThemeFile"
 #define SCIM_ANTHY_CONFIG_ROMAJI_HALF_SYMBOL          "/IMEngine/Anthy/RomajiHalfSymbol"
@@ -53,15 +55,18 @@
 #define SCIM_ANTHY_CONFIG_DICT_ENCODING               "/IMEngine/Anthy/DictEncoding"
 #define SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND          "/IMEngine/Anthy/DictAdminCommand"
 #define SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND            "/IMEngine/Anthy/AddWordCommand"
+#define SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND_YOMI_OPTION "/IMEngine/Anthy/AddWordCommandYomiOption"
 
 #define SCIM_ANTHY_CONFIG_PREDICT_ON_INPUT            "/IMEngine/Anthy/PredictOnInput"
 #define SCIM_ANTHY_CONFIG_USE_DIRECT_KEY_ON_PREDICT   "/IMEngine/Anthy/UseDirectKeyOnPredict"
 
 #define SCIM_ANTHY_CONFIG_COLOR_THEME_FILE            "/IMEngine/Anthy/ColorThemeFile"
 
+#define SCIM_ANTHY_CONFIG_USE_CUSTOM_LOOKUP_WINDOW    "/IMEngine/Anthy/UseCustomLookupWindow"
+#define SCIM_ANTHY_CONFIG_ENABLE_DICTION              "/IMEngine/Anthy/EnableDiction"
 #define SCIM_ANTHY_CONFIG_SHOW_CANDIDATES_LABEL       "/IMEngine/Anthy/ShowCandidatesLabel"
-#define SCIM_ANTHY_CONFIG_CAND_WIN_PAGE_SIZE          "/IMEngine/Anthy/CandWinPageSize"
 #define SCIM_ANTHY_CONFIG_CLOSE_CAND_WIN_ON_SELECT    "/IMEngine/Anthy/CloseCandWinOnSelect"
+#define SCIM_ANTHY_CONFIG_CAND_WIN_PAGE_SIZE          "/IMEngine/Anthy/CandWinPageSize"
 #define SCIM_ANTHY_CONFIG_N_TRIGGERS_TO_SHOW_CAND_WIN "/IMEngine/Anthy/NTriggersToShowCandWin"
 
 #define SCIM_ANTHY_CONFIG_SHOW_INPUT_MODE_LABEL       "/IMEngine/Anthy/ShowInputModeLabel"
@@ -157,18 +162,29 @@
 #define SCIM_ANTHY_CONFIG_SELECTED_SEGMENT_STYLE      "/IMEngine/Anthy/SelectedSegmentStyle"
 #define SCIM_ANTHY_CONFIG_SELECTED_SEGMENT_FG_COLOR   "/IMEngine/Anthy/SelectedSegmentFGColor"
 #define SCIM_ANTHY_CONFIG_SELECTED_SEGMENT_BG_COLOR   "/IMEngine/Anthy/SelectedSegmentBGColor"
+#define SCIM_ANTHY_CONFIG_SHOW_TRAY_ICON              "/IMEngine/Anthy/ShowTrayIcon"
+
+
+#define SCIM_ANTHY_CONFIG_LOOKUP_BORDER_COLOR         "/IMEngine/Anthy/LookupBorderColor"
+#define SCIM_ANTHY_CONFIG_NOTE_BORDER_COLOR           "/IMEngine/Anthy/NoteBorderColor"
+#define SCIM_ANTHY_CONFIG_NOTE_BG_COLOR               "/IMEngine/Anthy/NoteBackgroundColor"
+#define SCIM_ANTHY_CONFIG_NOTE_TEXT_COLOR             "/IMEngine/Anthy/NoteTextColor"
+#define SCIM_ANTHY_CONFIG_AUX_TEXT_COLOR              "/IMEngine/Anthy/AuxTextColor"
+#define SCIM_ANTHY_CONFIG_AUX_BG_COLOR                "/IMEngine/Anthy/AuxBackgroundColor"
+#define SCIM_ANTHY_CONFIG_NOTE_FONT                   "/IMEngine/Anthy/NoteFont"
 
 
 /* default config values */
 #define SCIM_ANTHY_CONFIG_INPUT_MODE_DEFAULT                  "Hiragana"
 #define SCIM_ANTHY_CONFIG_TYPING_METHOD_DEFAULT               "Romaji"
 #define SCIM_ANTHY_CONFIG_CONVERSION_MODE_DEFAULT             "MultiSeg"
+#define SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT_DEFAULT       "Commit"
+
 #define SCIM_ANTHY_CONFIG_PERIOD_STYLE_DEFAULT                "Japanese"
 #define SCIM_ANTHY_CONFIG_SYMBOL_STYLE_DEFAULT                "Japanese"
 #define SCIM_ANTHY_CONFIG_SPACE_TYPE_DEFAULT                  "FollowMode"
 #define SCIM_ANTHY_CONFIG_TEN_KEY_TYPE_DEFAULT                "FollowMode"
 #define SCIM_ANTHY_CONFIG_BEHAVIOR_ON_PERIOD_DEFAULT          "None"
-#define SCIM_ANTHY_CONFIG_BEHAVIOR_ON_FOCUS_OUT_DEFAULT       "Commit"
 
 #define SCIM_ANTHY_CONFIG_ROMAJI_THEME_FILE_DEFAULT           ""
 #define SCIM_ANTHY_CONFIG_ROMAJI_HALF_SYMBOL_DEFAULT          false
@@ -188,18 +204,21 @@
 #define SCIM_ANTHY_CONFIG_LEARN_ON_MANUAL_COMMIT_DEFAULT      true
 #define SCIM_ANTHY_CONFIG_LEARN_ON_AUTO_COMMIT_DEFAULT        true
 
-#define SCIM_ANTHY_CONFIG_DICT_ENCODING_DEFAULT               "UTF-8"
+#define SCIM_ANTHY_CONFIG_DICT_ENCODING_DEFAULT               "EUC-JP"
 #define SCIM_ANTHY_CONFIG_DICT_ADMIN_COMMAND_DEFAULT          "kasumi"
 #define SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND_DEFAULT            "kasumi --add"
+#define SCIM_ANTHY_CONFIG_ADD_WORD_COMMAND_YOMI_OPTION_DEFAULT "--sound"
 
 #define SCIM_ANTHY_CONFIG_PREDICT_ON_INPUT_DEFAULT            false
 #define SCIM_ANTHY_CONFIG_USE_DIRECT_KEY_ON_PREDICT_DEFAULT   true
 
 #define SCIM_ANTHY_CONFIG_COLOR_THEME_FILE_DEFAULT            ""
 
+#define SCIM_ANTHY_CONFIG_USE_CUSTOM_LOOKUP_WINDOW_DEFAULT    true
+#define SCIM_ANTHY_CONFIG_ENABLE_DICTION_DEFAULT              true
 #define SCIM_ANTHY_CONFIG_SHOW_CANDIDATES_LABEL_DEFAULT       true
-#define SCIM_ANTHY_CONFIG_CAND_WIN_PAGE_SIZE_DEFAULT          10
 #define SCIM_ANTHY_CONFIG_CLOSE_CAND_WIN_ON_SELECT_DEFAULT    true
+#define SCIM_ANTHY_CONFIG_CAND_WIN_PAGE_SIZE_DEFAULT          10
 #define SCIM_ANTHY_CONFIG_N_TRIGGERS_TO_SHOW_CAND_WIN_DEFAULT 2
 
 #define SCIM_ANTHY_CONFIG_SHOW_INPUT_MODE_LABEL_DEFAULT       true
@@ -295,6 +314,16 @@
 #define SCIM_ANTHY_CONFIG_SELECTED_SEGMENT_STYLE_DEFAULT      "Reverse"
 #define SCIM_ANTHY_CONFIG_SELECTED_SEGMENT_FG_COLOR_DEFAULT   "#FFFFFF"
 #define SCIM_ANTHY_CONFIG_SELECTED_SEGMENT_BG_COLOR_DEFAULT   "#0900A5"
+#define SCIM_ANTHY_CONFIG_SHOW_TRAY_ICON_DEFAULT               true
+
+
+#define SCIM_ANTHY_CONFIG_LOOKUP_BORDER_COLOR_DEFAULT         "gray"
+#define SCIM_ANTHY_CONFIG_NOTE_BORDER_COLOR_DEFAULT           "gray"
+#define SCIM_ANTHY_CONFIG_NOTE_BG_COLOR_DEFAULT               "misty rose"
+#define SCIM_ANTHY_CONFIG_NOTE_TEXT_COLOR_DEFAULT             "black"
+#define SCIM_ANTHY_CONFIG_AUX_TEXT_COLOR_DEFAULT              "black"
+#define SCIM_ANTHY_CONFIG_AUX_BG_COLOR_DEFAULT                "light gray"
+#define SCIM_ANTHY_CONFIG_NOTE_FONT_DEFAULT                   "Sans 10"
 
 
 #ifdef SCIM_ANTHY_USE_GTK

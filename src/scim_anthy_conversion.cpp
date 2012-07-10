@@ -23,9 +23,10 @@
 #include "scim_anthy_imengine.h"
 #include "scim_anthy_conversion.h"
 #include "scim_anthy_utils.h"
-#include "scim_anthy_prefs.h"
 
 using namespace scim_anthy;
+
+static unsigned int anthy_ref_count = 0;
 
 static void rotate_case (String &str);
 
@@ -90,12 +91,28 @@ Conversion::Conversion (AnthyInstance &anthy, Reading &reading)
       m_cur_segment        (-1),
       m_predicting         (false)
 {
-    set_dict_encoding (String (SCIM_ANTHY_CONFIG_DICT_ENCODING_DEFAULT));
+    if (!anthy_ref_count) {
+        if (anthy_init()) {
+            SCIM_DEBUG_IMENGINE(1) << "Failed to initialize Anthy Library!\n";
+        }
+    }
+    anthy_ref_count++;
+
+    set_dict_encoding (String ("EUC-JP"));
+
+#ifdef HAS_ANTHY_SET_RECONVERSION_MODE
+    anthy_set_reconversion_mode (m_anthy_context, ANTHY_RECONVERT_DISABLE);
+#endif /* HAS_ANTHY_SET_RECONVERSION_MODE */
 }
 
 Conversion::~Conversion ()
 {
     anthy_release_context (m_anthy_context);
+
+    if (anthy_ref_count)
+        anthy_ref_count--;
+    if (!anthy_ref_count)
+        anthy_quit();
 }
 
 
@@ -147,12 +164,19 @@ Conversion::convert (WideString source, CandidateType ctype,
 void
 Conversion::convert (CandidateType ctype, bool single_segment)
 {
+#ifdef HAS_ANTHY_SET_RECONVERSION_MODE
+    anthy_set_reconversion_mode (m_anthy_context, ANTHY_RECONVERT_DISABLE);
+#endif /* HAS_ANTHY_SET_RECONVERSION_MODE */
     convert (m_reading.get (), ctype, single_segment);
 }
 
 void
 Conversion::convert (const WideString &source, bool single_segment)
 {
+
+#ifdef HAS_ANTHY_SET_RECONVERSION_MODE
+    anthy_set_reconversion_mode (m_anthy_context, ANTHY_RECONVERT_ALWAYS);
+#endif /* HAS_ANTHY_SET_RECONVERSION_MODE */
     convert (source, SCIM_ANTHY_CANDIDATE_DEFAULT, single_segment);
 }
 
@@ -224,6 +248,16 @@ Conversion::commit (int segment_id, bool learn)
 {
     if (!is_converting ()) return;
 
+#ifdef HAS_ANTHY_COMMIT_PREDICTION
+    if (is_predicting ()) {
+        int id = m_segments[0].get_candidate_id ();
+        if (learn)
+            anthy_commit_prediction (m_anthy_context, id);
+        clear (0);
+        return;
+    }
+#endif /* HAS_ANTHY_COMMIT_PREDICTION */
+
     // learn
     for (unsigned int i = m_start_id;
          learn &&
@@ -231,14 +265,82 @@ Conversion::commit (int segment_id, bool learn)
              (segment_id < 0 || (int) i <= segment_id);
          i++)
     {
-        if (m_segments[i].get_candidate_id () >= 0)
+        int cand = m_segments[i].get_candidate_id ();
+        if (cand >= 0) {
             anthy_commit_segment (m_anthy_context, i,
                                   m_segments[i].get_candidate_id ());
+        } else if (cand == SCIM_ANTHY_CANDIDATE_HIRAGANA) {
+#ifdef NTH_HIRAGANA_CANDIDATE
+            anthy_commit_segment (m_anthy_context, i, NTH_HIRAGANA_CANDIDATE);
+#else  /* NTH_HIRAGANA_CANDIDATE */
+            force_learn (i - m_start_id);
+#endif /* NTH_HIRAGANA_CANDIDATE */
+        } else if (cand == SCIM_ANTHY_CANDIDATE_KATAKANA) {
+#ifdef NTH_KATAKANA_CANDIDATE
+            anthy_commit_segment (m_anthy_context, i, NTH_KATAKANA_CANDIDATE);
+#else  /* NTH_KATAKANA_CANDIDATE */
+            force_learn (i - m_start_id);
+#endif /* NTH_KATAKANA_CANDIDATE */
+        } else if (cand == SCIM_ANTHY_CANDIDATE_HALF_KATAKANA) {
+#ifdef NTH_HALFKANA_CANDIDATE
+            anthy_commit_segment (m_anthy_context, i, NTH_HALFKANA_CANDIDATE);
+#else  /* NTH_HALFKANA_CANDIDATE */
+            force_learn (i - m_start_id);
+#endif /* NTH_HALFKANA_CANDIDATE */
+        }
     }
 
     clear (segment_id);
 }
 
+bool
+Conversion::force_learn (int segment_id)
+{
+    // Find same string with the commited string from candidates and learn it.
+
+    struct anthy_conv_stat conv_stat;
+    anthy_get_stat (m_anthy_context, &conv_stat);
+
+    if (conv_stat.nr_segment <= 0)
+        return false;
+
+    if (segment_id < 0) {
+        if (m_cur_segment < 0)
+            return false;
+        else
+            segment_id = m_cur_segment;
+    }
+    int real_segment_id = segment_id + m_start_id;
+
+    if (real_segment_id >= conv_stat.nr_segment)
+        return false;
+
+    struct anthy_segment_stat seg_stat;
+    anthy_get_segment_stat (m_anthy_context, real_segment_id, &seg_stat);
+
+    WideString commit_str = m_segments[segment_id].get_string ();
+
+    for (int i = 0; i < seg_stat.nr_candidate; i++) {
+        int len = anthy_get_segment (m_anthy_context, real_segment_id, i,
+                                     NULL, 0);
+        if (len <= 0)
+            continue;
+
+        char buf[len + 1];
+        anthy_get_segment (m_anthy_context, real_segment_id,
+                           i, buf, len + 1);
+
+        WideString cand_wide;
+        m_iconv.convert (cand_wide, buf, len);
+
+        if (cand_wide == commit_str) {
+            anthy_commit_segment (m_anthy_context, real_segment_id, i);
+            return true;
+        }
+    }
+
+    return false;
+}
 
 
 //

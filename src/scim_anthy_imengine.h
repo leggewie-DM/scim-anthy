@@ -2,6 +2,7 @@
 /*
  *  Copyright (C) 2004 Hiroyuki Ikezoe
  *  Copyright (C) 2004 Takuro Ashie
+ *  Copyright (C) 2006 - 2007 Takashi Nakamoto
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,10 +30,11 @@
 #define Uses_SCIM_IMENGINE
 #define Uses_SCIM_CONFIG_BASE
 #include <map>
-#include <anthy/anthy.h>
 #include <scim.h>
 #include "scim_anthy_preedit.h"
 #include "scim_anthy_key2kana_table.h"
+#include "scim_anthy_diction.h"
+#include "scim_anthy_const.h"
 
 using namespace scim;
 using namespace scim_anthy;
@@ -40,13 +42,6 @@ using namespace scim_anthy;
 class AnthyFactory;
 
 namespace scim_anthy {
-
-typedef enum {
-    SCIM_ANTHY_CONVERSION_MULTI_SEGMENT,
-    SCIM_ANTHY_CONVERSION_SINGLE_SEGMENT,
-    SCIM_ANTHY_CONVERSION_MULTI_SEGMENT_IMMEDIATE,
-    SCIM_ANTHY_CONVERSION_SINGLE_SEGMENT_IMMEDIATE,
-} ConversionMode;
 
 typedef void (*timeout_func) (void *data);
 typedef void (*delete_func)  (void *data);
@@ -109,6 +104,22 @@ public:
                                                const Transaction &trans);
 
     virtual void reload_config                (const ConfigPointer &config);
+
+protected:
+    /* signal activation functions */
+    void show_aux_string_advanced             (void);
+    void hide_aux_string_advanced             (void);
+    void update_aux_string_advanced           (const WideString &str,
+                                               const AttributeList &attrs
+                                               = AttributeList());
+
+    void show_lookup_table_advanced           (void);
+    void hide_lookup_table_advanced           (void);
+    void update_lookup_table_advanced         (const LookupTable &table);
+
+    void show_note                            (void);
+    void hide_note                            (void);
+    void update_note                          (const WideString &str);
 
 public:
     /* actions */
@@ -253,11 +264,17 @@ private:
     bool                  m_lookup_table_visible;
     unsigned int          m_n_conv_key_pressed;
 
+    /* for diction */
+    AnthyDictionService   m_diction_service;
+
     /* for toggling latin and wide latin */
     InputMode             m_prev_input_mode;
 
     /* for toolbar */
     PropertyList          m_properties;
+
+    /* for tray icon */
+    PropertyList          m_tray_properties;
 
     /*  */
     ConversionMode        m_conv_mode;

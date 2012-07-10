@@ -2,6 +2,7 @@
 /*
  *  Copyright (C) 2004 Hiroyuki Ikezoe
  *  Copyright (C) 2004 Takuro Ashie
+ *  Copyright (C) 2007 Takashi Nakamoto
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +29,6 @@
 
 #define Uses_SCIM_IMENGINE
 #define Uses_SCIM_CONFIG_BASE
-#include <anthy/anthy.h>
 #include <scim.h>
 #include "scim_anthy_action.h"
 #include "scim_anthy_style_file.h"
@@ -103,6 +103,7 @@ public:
     String         m_dict_encoding;
     String         m_dict_admin_command;
     String         m_add_word_command;
+    String         m_add_word_command_yomi_option;
 
     bool           m_predict_on_input;
     bool           m_use_direct_key_on_predict;
@@ -115,6 +116,10 @@ public:
     bool           m_show_dict_label;
     bool           m_show_dict_admin_label;
     bool           m_show_add_word_label;
+
+    bool           m_show_tray_icon;
+
+    bool           m_use_custom_lookup_window;
 
     String         m_preedit_style;
     unsigned int   m_preedit_fg_color;

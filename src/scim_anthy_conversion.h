@@ -75,9 +75,6 @@ public:
     virtual ~Conversion ();
 
     // starting and finishing
-    void          convert                (WideString    source,
-                                          CandidateType ctype,
-                                          bool          single_segment);
     void          convert                (CandidateType type
                                           = SCIM_ANTHY_CANDIDATE_DEFAULT,
                                           bool          single_segment = false);
@@ -87,7 +84,6 @@ public:
     void          clear                  (int           segment_id = -1);
     void          commit                 (int           segment_id = -1,
                                           bool          learn      = true);
-
     // getting status
     bool          is_converting          (void);
     bool          is_predicting          (void);
@@ -119,6 +115,9 @@ public:
     bool          set_dict_encoding      (String        type);
 
 private:
+    void          convert                (WideString    source,
+                                          CandidateType ctype,
+                                          bool          single_segment);
     void          get_reading_substr     (WideString   &string,
                                           int           segment_id,
                                           int           candidate_id,
@@ -126,6 +125,7 @@ private:
                                           int           seg_len);
     WideString    get_prediction_string  (int           candidate_id);
     void          join_all_segments      (void);
+    bool          force_learn            (int           segment_id);
 
 private:
     AnthyInstance      &m_anthy;

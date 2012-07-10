@@ -1,43 +1,30 @@
-2009-0l-29 Takuro Ashie <ashie@homa.ne.jp>
+2008-02-29 Takuro Ashie <ashie@homa.ne.jp>
 
-	* configure.ac: Version-1.2.7.
-
-2009-01-25 Takuro Ashie <ashie@homa.ne.jp>
-
-	* src/scim_anthy_conversion.cpp: Add missing include file.
-	Thanks Utumi-san, Ikuya-san.
-
-2009-0l-15 Takuro Ashie <ashie@homa.ne.jp>
-
-	* src/scim_anthy_conversion.cpp, src/scim_anthy_setup.cpp,
-	  src/scim_anthy_prefs.h:
-	Set UTF-8 as default encoding (ported from 1.4 branch).
-
-2009-0l-14 Takuro Ashie <ashie@homa.ne.jp>
-
-	* src/scim_anthy_imengine.cpp: Removed a needless line.
-
-2008-08-04 Takuro Ashie <ashie@homa.ne.jp>
-
-	* src/scim_anthy_reading.cpp: Set NICOLA engine as case sensitive.
-
-2008-03-29 Takuro Ashie <ashie@homa.ne.jp>
-
-	* configure.ac: Version-1.2.6.
-
-2008-03-28 Takuro Ashie <ashie@homa.ne.jp>
-
-	* src/scim_anthy_factory.cpp, src/scim_anthy_imengine.cpp,
-	  src/scim_anthy_prefs.cpp:
-	Fix typo. Thanks Malcolm Parsons and Ikuya Awashiro. 
+	* configure.ac: Version-1.3.1.
 
 2008-02-29 Takuro Ashie <ashie@homa.ne.jp>
 
-	* configure.ac: Version-1.2.5.
+	* configure.ac: Version-1.2.5 (BRANCH_1_2).
+
+2008-02-27 Takuro Ashie <ashie@homa.ne.jp>
+
+	*  src/scim_anthy_imengine.h, src/scim_anthy_preedit.h,
+	   src/scim_anthy_factory.h:
+	Removed needless includes.
+
+2008-02-26 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_factory.cpp, src/scim_anthy_conversion.cpp:
+	  Initialize the Anthy library at Conversion class instead of at
+	  AnthyFactory class.
 
 2008-02-26 Takuro Ashie <ashie@homa.ne.jp>
 
 	* src/scim_anthy_setup.cpp: Sort style file list by name.
+
+2008-02-26 Takuro Ashie <ashie@homa.ne.jp>
+
+	* po/POTFILES.in: Fix a build problem.
 
 2008-02-25 Takuro Ashie <ashie@homa.ne.jp>
 
@@ -45,19 +32,27 @@
 
 2008-01-23 Takuro Ashie <ashie@homa.ne.jp>
 
-	* src/scim_anthy_imengine.cpp, src/scim_anthy_kana.cpp,
+	* src/scim_anthy_conversion.cpp, src/scim_anthy_diction.cpp,
+	  src/scim_anthy_imengine.cpp, src/scim_anthy_kana.cpp,
 	  src/scim_anthy_preedit.cpp, src/scim_anthy_prefs.cpp,
-	  src/scim_anthy_setup.cpp, src/scim_anthy_utils.cpp:
+	  src/scim_anthy_setup.cpp, src/scim_anthy_tray.cpp,
+	  src/scim_anthy_utils.cpp:
 	Added missing include files to build against gcc-4.3.
 
 2007-10-12 Takuro Ashie <ashie@homa.ne.jp>
 
-	* po/de.po: Add. Thanks Gerrit Sangel.
-	* data/nicola-f.sty: Backport from trunk. 
+	* po/de.po: Added. Thanks Gerrit Sangel.
 
 2007-05-29 Takuro Ashie <ashie@homa.ne.jp>
 
-	* configure.ac: Version-1.2.4.
+	* data/nicola-f.sty: Added. Thanks MORIYAMA Masayuki.
+	You also need to tune X Window System to apply NICOLA-F style completly.
+	Please see the following site for more details:
+	http://d.hatena.ne.jp/tree3yama/20070513/1179067686#c1180408348
+
+2007-05-29 Takuro Ashie <ashie@homa.ne.jp>
+
+	* configure.ac: Version-1.2.4 (BRANCH_1_2).
 
 2007-05-21 Takuro Ashie <ashie@homa.ne.jp>
 
@@ -78,37 +73,468 @@
 
 2007-04-29 Takuro Ashie <ashie@homa.ne.jp>
 
-	* configure.ac: Version-1.2.3.
+	* configure.ac: Version-1.2.3 (BRANCH_1_2).
+
+2007-04-18 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.{cpp,h}, src/scim_anthy_setup_kana.cpp,
+	  src/scim_anthy_setup_romaji.cpp:
+	Add create_subgroup_label(). Migrate all create_check_buton() to
+	GtkTable.
 
 2007-04-16 Takuro Ashie <ashie@homa.ne.jp>
 
-	* src/Makefile.am: Remove binary version from the install path of the
-	helper module.
 	* src/scim_anthy_factory.{cpp,h}, src/scim_anthy_key2kana.{cpp,h},
 	  src/scim_anthy_prefs.h, src/scim_anthy_default_table.cpp:
 	Add spcial treatment for "RO" key of JIS kana layout. It requires
 	scim-1.4.6 or later (it is not released yet).
 
-2007-03-28 Takuro Ashie <ashie@homa.ne.jp>
+2007-04-06  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.cpp: Move "All" item in the key category menu to
+	top, and capitalize it.
+	* po/ja.po: Update.
+
+2007-04-06  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.cpp: Move prediction related preferences to
+	"Common" page.
+	* po/ja.po: Update.
+
+2007-04-05  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* configure.ac, src/scim_anthy_helper.cpp,
+	  src/scim_anthy_setup.cpp
+	Rename SCIM_BUILD_TRAY SCIM_ANTHY_BUILD_TRAY.
+
+	* configure.ac, src/Makefile.am
+	SCIM_BUILD_TRAY is used to determine whether scim_anthy_tray.cpp
+	will be compiled.
+
+2007-04-04  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.{cpp,h}, src/scim_anthy_setup_kana.cpp:
+	Arrange left alignment of widgets on kana page.
+
+2007-04-04  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.cpp, src/scim_anthy_table_editor.cpp:
+	Add title labels for GtkTreeView widgets.
+	* po/ja.po: Update.
+
+2007-04-04  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_set.cpp: Use GtkOptionMenu for non editable dropdown
+	list (although GtkOptionMenu is deplecated on latest GTK+...).
+
+2007-04-04  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.cpp, src/scim_anthy_setup_kana.cpp,
+	src/scim_anthy_setup_romaji.cpp:
+	Fix padding of most outer containers and fix capitalization of title
+	labels to comply with Gnome HIG.
+	* po/ja.po: Update.
+
+2007-04-04  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.cpp: Add SCIM_BUILD_TRAY compile condition.
+
+2007-04-04  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* configure.ac
+	Fix the bug that tray is not built even if the SCIM supports
+	gtkutils.
+
+	* configure.ac, src/scim_anthy_helper.cpp
+	The tray icon won't be built if SCIM doesn't have gtkutils.
+
+	* src/scim_anthy_helper.cpp
+	Fix the bug that the helper window remains as a garbage window
+	even after hide_*() is called.
+
+2007-04-02  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_imengine.cpp
+	Fix the bug that helper windows remain as a garbage window
+	even after reset() is called.
+
+2007-03-30  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* configure.ac, bootstrap:
+	  Remove all files generated automatically by "autopoint" from CVS
+	  repository.
+
+2007-03-29 Takuro Ashie <ashie@homa.ne.jp>
 
 	* src/scim_anthy_imengine.{cpp,h}: Show aux string again if the lookup
-	table is activated on focus in event.
+	table is activated on focus in event (Merge from BRANCH_1_2).
 	Thanks TAGOH-san and somebody who contributes the patch.
+
+2007-03-29  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* Version-1.3.0.
+
+2007-03-28  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_tray.cpp: Define TRAY_ICON_SIZE.
+
+2007-03-28  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_conversion.cpp: Fix a bug that ANTHY_RECONVERT_ALWAYS
+	was used on normal conversion.
+
+2007-03-23  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_tray.cpp: Set transparency of tray icon.
+
+2007-03-23  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_imengine.cpp: Set "EUC-JP" for the character
+	encoding of the string to pass Kasumi.
+
+	* data/diction: Add one empty line to read the first chunk
+	correctly.
+	* src/scim_anthy_diction.cpp: disable diction fuction if the
+	diction file cannot be loaded correctly.
+
+2007-03-22  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_conversion.cpp, src/scim_anthy_setup.cpp:
+	Add "UTF-8" into dictionary encodings list.
+
+2007-03-22  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_tray.cpp: Set tray icon size to 18.
+	I prefer 18 than 20 :)
+
+2007-03-22  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_imengine.cpp: Suppress compile time warnings.
+	* src/scim_anthy_tray.cpp: Ditto.
+
+2007-03-21  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_prefs.cpp: Remove SCIM_ANTHY_CONFIG_DICTION_FILE.
+	* src/scim_anthy_diction.cpp: Ditto. And load ~/.scim/Anthy/diction
+	instead of the system wide diction file if it exists.
+
+2007-03-20  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.cpp: Remove some needless config items.
+	Move tray icon config to toolbar page.
+	* src/scim_anthy_prefs.cpp: Fix a label.
+	* po/ja.po: Update.
+
+2007-03-20  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_prefs.h: Remove categories from new config items.
+
+2007-03-20  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_imengine.cpp, src/scim_anthy_helper.cpp:
+	It is not needed to add SCIM_TRANS_CMD_REQUEST on sending helper event.
+	SCIM will take care about it.
+
+2007-03-20  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_helper.cpp, src/scim_anthy_helper.h
+	  src/scim_anthy_const.h, src/scim_anthy_imengine.cpp:
+	Enable selecting candidates by mouse click.
+
+2007-03-11  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_helper.cpp, src/scim_anthy_helper.h:
+	Drastic changes on manipulation of the helper window and the
+	note window to avoid their flickering.
+
+2007-03-09  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_prefs.h: Reorder some config items.
+
+2007-03-06  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_imengine.cpp:
+	Fix the bug that the aux string is not updated on the custom
+	lookup window.
+
+2007-03-05  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.cpp:
+	Remove launch buttons in the dictionary page.
+
+2007-03-05  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_setup.cpp: Set sensitivity of dition check button.
+	* src/scim_anthy_prefs.cpp: Fix some messages.
+	* po/ja.po: Update.
+
+2007-03-05  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_prefs.cpp, src/scim_anthy_setup.cpp:
+	Add UI for SCIM_ANTHY_CONFIG_USE_CUSTOM_LOOKUP_WINDOW.
+
+2007-03-04  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_prefs.cpp, src/scim_anthy_setup.cpp:
+	Add UI for some new configuration items.
+
+2007-02-24  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* configure.ac: Bump version number.
+	* NEWS: Update.
+
+2007-02-24  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/Makefile.am, src/scim_anthy_const.h, src/scim_anthy_helper.h,
+	  src/scim_anthy_imengine.cpp:
+	Remove GTK+2 dependency from scim-anthy module.
+
+2007-02-15  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_factory.cpp, src/scim_anthy_factory.h,
+	  src/scim_anthy_imengine.cpp, src/scim_anthy_tray.h
+	  src/scim_anthy_prefs.h
+	Added the option to hide the scim-anthy tray icon.
+
+	* configure.ac
+	increase the requirement version of gtk+-2.0 to 2.8.0 due to the
+	funciton "gtk_menu_shell_set_take_focus".
+
+2007-02-14  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_factory.cpp, src/scim_anthy_factory.h,
+	  src/scim_anthy_imengine.h, src/scim_anthy_imengine.cpp,
+	  src/scim_anthy_helper.cpp, src/scim_anthy_prefs.h
+	 - Fixed the bug that the note window is displayed above
+	   the lookup window.
+	 - Added my copyright notice.
+	 - Added some configuration options for colors, fonts and so on.
+	 - New function to disable the custom lookup window.
+	 - Give me chocolates!
+
+2007-02-09  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_helper.cpp, src/scim_anthy_helper.h
+	 - Added a new option to determine the face font to show a note.
+	 - Some default colors are changed according to my favorite.
+
+2007-02-05  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_helper.cpp, src/scim_anthy_helper.h
+	 - Fundamental changes around the colors.
+	 - Change the padding size of each candidate for good-looking.
+
+2007-02-04  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_diction.cpp, src/scim_anthy_imengine.cpp
+	Changes about the line feed code at the end of diction text.
+
+2007-02-03  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* data/conjugation, data/diction, src/scim_anthy_diction.cpp
+	 - Imported most of diction data from prime-dict.
+	   Thanks to the authors of prime-dict.
+	 - Improved conjugation file.
+
+2007-01-21  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* data/conjugation, src/scim_anthy_diction.cpp,
+	  src/scim_anthy_diction.h:
+	Support declinable words for diction.
+
+2007-01-14  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_imengine.cpp, src/scim_anthy_imengine.h,
+	  src/scim_anthy_tray.cpp:
+
+	  - Fixed the problem that the general menu items of tray icon cannot
+	    be activated by clicking the left button.
+	  - Changed the label of the general menu items.
 
 2007-01-06  Takuro Ashie  <ashie@homa.ne.jp>
 
 	* src/scim_anthy_utils.h: Include missing header files.
 	Thanks Gregor Waltz.
 
+2006-12-28  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_tray.cpp, src/scim_anthy_tray.h,
+	  src/scim_anthy_imengine.cpp, src/scim_anthy_helper.cpp,
+	  src/scim_anthy_const.h:	
+	The skelton of right click menu for the tray icon.
+
+2006-12-27  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_tray.cpp, src/scim_anthy_tray.h:
+	  - Configure the tray button padding to be 0.
+	  - Reserve the right button click on the tray button for showing
+	    a general menu to change various modes.
+	  - Implement the tray icon with GtkEventBox + GtkLabel
+	    alternative to the GtkButton.
+	    (see USE_GTK_BUTTON_FOR_TRAY macro in src/scim_anthy_tray.h)
+	  - Fix the problem that the tray icon cannot be hidden properly.
+	  - Use the input methods icons, available from
+	    http://code.google.com/p/inputmethod-icons/, for tray.
+
+2006-12-24  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_tray.cpp, src/scim_anthy_tray.h,
+	  src/scim_anthy_imengine.cpp, src/scim_anthy_imengine.h, 
+	  src/scim_anthy_helper.cpp, src/scim_anthy_helper.h, 
+	  src/scim_anthy_preedit.h, src/scim_anthy_key2kana_table.h,
+	  src/scim_anthy_const.h, src/Makefile.am:
+	Reduce the number of tray icons to one.
+
+	* src/scim_anthy_diction.cpp, data/Makefile.am,
+	  data/conjugation:
+	Test data to append conjugated ending
+
+
+2006-12-23  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_tray.cpp:
+	Prevent the menu widgets from taking focus.
+
+2006-12-20  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_helper.cpp, src/scim_anthy_tray.cpp:
+	Hide tray icons at the time of focus out.
+
+	* src/scim_anthy_helper.cpp:
+	Add missing "break" statements.
+
+	* src/scim_anthy_diction.cpp, src/scim_anthy_diction.h,
+	  src/scim_anthy_imengine.cpp, src/scim_anthy_imengine.h:
+	Change matching function for finding diction of conjugated words.
+
+	* data/diction:
+	Add part of speech lines and new examples.
+
+2006-12-19  Takuro Ashie  <ashie@homa.ne.jp>
+
+	* src/scim_anthy_helper.cpp:
+	  - Use "delete" for objects allocated by "new".
+	  - Initialize global variables.
+
+2006-12-18  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_tray.cpp, src/scim_anthy_tray.h,
+	  src/scim_anthy_helper.cpp, src/scim_anthy_helper.h,
+	  src/scim_anthy_imengine.cpp:
+	Complete tray icons.
+
+2006-12-17  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_tray.cpp, src/scim_anthy_tray.h
+	Add tooltips of tray icons and menu items.
+
+2006-12-15  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_helper.cpp, src/scim_anthy_imengine.cpp,
+	  src/scim_anthy_tray.cpp, src/scim_anthy_tray.h,
+	  src/Makefile.am:
+	Add tray icons but they has not been effective yet.
+
+2006-12-13  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_helper.cpp, src/scim_anthy_helper.h,
+	  src/scim_anthy_tray.cpp, src/scim_anthy_tray.h,
+	  src_scim_anthy_prefs.h, src/Makefile.am:
+	Add the skelton class managing tray icons.
+	But the related codes cannot be compiled yet because of name
+	confliction.
+
+2006-12-10  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_diction.cpp, src/scim_anthy_diction.h,
+	  src/scim_anthy_imengine.cpp, src/scim_anthy_imengine.h,
+	  src/scim_anthy_helper.cpp, src/scim_anthy_helper.h,
+	  src/scim_anthy_prefs.h, src/Makefile.am,
+	  data/diction, src/Makefile.am:
+	Add a function to display diction.
+
+2006-12-08  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_helper.cpp, src/scim_anthy_helper.h:
+	 - Changed the appearance of lookup table and aux string to suit with
+	   desktop and scim configuration.
+	 - Added interfaces to manipulate note.
+
+2006-12-07  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_helper.cpp, src/scim_anthy_helper.h:
+	Fix the location of lookup table and aux string to be confined to
+	screen.
+
+2006-12-06  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_helper.cpp, src/scim_anthy_helper.h
+	  src/scim_anthy_imengine.cpp, src/scim_anthy_imengine.h
+	  src/Makefile.am:
+	  The skelton of custom lookup window.
+
+2006-11-27 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_helper.cpp: Add a sample code for getting spot
+	location. It will be used for our custom lookup window.
+
+2006-11-23  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_imengine.cpp, src/scim_anthy_prefs.cpp:
+	Change the string "Conversion mode" to "Conversion method" to
+	avoid conflit the with different function with the same name of
+	MS-IME.
+	* po/ja.po: Update
+
+2006-11-15 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_imengine.cpp: Clear or commit the current preedit text
+	when exit Japanese mode.
+
 2006-11-14 Takuro Ashie <ashie@homa.ne.jp>
 
-	* configure.ac; Version-1.2.2.
+	* configure.ac; Version-1.2.2 (BRANCH_1_2).
+
+2006-11-13 Takuro Ashie <ashie@homa.ne.jp>
+
+	* configure.ac: Add missing checks pointed out by autoscan.
+
+2006-11-13 Takuro Ashie <ashie@homa.ne.jp>
+
+	* configure.ac: Use pkg-config to check the anthy library.
+	* README: Require anthy-7500 or later.
+
+2006-10-30 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_conversion.cpp: Use anthy_set_reconversion_mode() if
+	it is available. But I don't test it yet.
 
 2006-10-30 Takuro Ashie <ashie@homa.ne.jp>
 
 	* src/scim_anthy_conversion.cpp: Fix a bug that a wrong partial string
 	is converted on direct kana conversion after commiting a piece of
 	segments.
+
+2006-10-30 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_conversion.{cpp,h}: Learn a result of direct kana
+	selecting.
+
+2006-10-30 Takuro Ashie <ashie@homa.ne.jp>
+
+	* src/scim_anthy_conversion.cpp: Learn a result of prediction.
+
+2006-10-15  Takashi Nakamoto  <bluedwarf@bpost.plala.or.jp>
+
+	* src/scim_anthy_setup.cpp, src/scim_anthy_prefs.cpp,
+	  po/ja.po
+	Add a preference to change the argument of yomi option.
+
+	* src/scim_anthy_factory.cpp, src/scim_anthy_factory.h,
+	  src/scim_anthy_imengine.cpp, src/scim_anthy_prefs.h:
+	Enable to launch a dictionary tool with yomi option as a
+	result of CodeFest Kyoto 2006.
+	https://members.fsij.org/trac/codefest2006kyoto/wiki	
 
 2006-09-29 Takuro Ashie <ashie@homa.ne.jp>
 

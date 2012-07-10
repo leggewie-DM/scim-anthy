@@ -1,18 +1,24 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 
-AC_INIT(scim-anthy, 1.2.7, ashie@homa.ne.jp)
+m4_define([scim_anthy_major_version], [1])
+m4_define([scim_anthy_minor_version], [3])
+m4_define([scim_anthy_micro_version], [1])
+m4_define([scim_anthy_version],
+          [scim_anthy_major_version.scim_anthy_minor_version.scim_anthy_micro_version])
+
+AC_INIT(scim-anthy, scim_anthy_version, ashie@homa.ne.jp)
 AC_CONFIG_SRCDIR([configure.ac])
 
 # Save this value here, since automake will set cflags and cxxflags later
 cflags_set=${CFLAGS+set}
 cppflags_set=${CPPFLAGS+set}
 
-SCIM_ANTHY_MAJOR_VERSION=1
-SCIM_ANTHY_MINOR_VERSION=2
-SCIM_ANTHY_MICRO_VERSION=7
+SCIM_ANTHY_MAJOR_VERSION=scim_anthy_major_version
+SCIM_ANTHY_MINOR_VERSION=scim_anthy_minor_version
+SCIM_ANTHY_MICRO_VERSION=scim_anthy_micro_version
 
-SCIM_ANTHY_VERSION=$SCIM_ANTHY_MAJOR_VERSION.$SCIM_ANTHY_MINOR_VERSION.$SCIM_ANTHY_MICRO_VERSION
+SCIM_ANTHY_VERSION=scim_anthy_version
 
 AC_SUBST(SCIM_ANTHY_MAJOR_VERSION)
 AC_SUBST(SCIM_ANTHY_MINOR_VERSION)
@@ -26,6 +32,7 @@ AM_CONFIG_HEADER(config.h)
 # Init gettext
 ALL_LINGUAS="de ja"
 AM_GNU_GETTEXT
+AM_GNU_GETTEXT_VERSION(0.16.1)
 
 GETTEXT_PACKAGE=scim-anthy
 AC_SUBST(GETTEXT_PACKAGE)
@@ -40,10 +47,13 @@ AC_SUBST(LIBTOOL_DEPS)
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+AC_PROG_YACC
 AC_LANG(C++)
 
 AC_C_CONST
 AC_TYPE_SIZE_T
+AC_TYPE_PID_T
+AC_CHECK_TYPES([ptrdiff_t])
 
 # Checks for libraries.
 
@@ -56,36 +66,46 @@ PKG_CHECK_MODULES(SCIM_GTKUTILS,[scim-gtkutils >= $SCIM_VERSION],
 		  		[SCIM_HAS_GTKUTILS=yes],
 				[SCIM_HAS_GTKUTILS=no])
 
-
 AC_SUBST(SCIM_VERSION)
 
 AM_CONDITIONAL(SCIM_BUILD_SETUP, [test "$SCIM_HAS_GTKUTILS" = "yes"])
+AM_CONDITIONAL(SCIM_BUILD_TRAY, [test "$SCIM_HAS_GTKUTILS" = "yes"])
 
 if test "$SCIM_HAS_GTKUTILS" = "yes"; then
   SCIM_BUILD_SETUP=1
+  SCIM_BUILD_TRAY=1
+  AC_DEFINE([SCIM_ANTHY_BUILD_TRAY], [], [build tray icon])
 else
   SCIM_BUILD_SETUP=0
+  SCIM_BUILD_TRAY=0
 fi
 
 AC_SUBST(SCIM_BUILD_SETUP)
+AC_SUBST(SCIM_BUILD_TRAY)
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_FUNC_ALLOCA
-AC_CHECK_HEADERS([argz.h fcntl.h float.h inttypes.h langinfo.h libintl.h limits.h locale.h malloc.h stddef.h stdint.h stdio_ext.h stdlib.h string.h strings.h sys/param.h unistd.h wchar.h])
+AC_HEADER_SYS_WAIT
+AC_HEADER_TIME
+AC_HEADER_STDBOOL
+AC_CHECK_HEADERS([argz.h fcntl.h float.h inttypes.h langinfo.h libintl.h limits.h locale.h malloc.h stddef.h stdint.h stdio_ext.h stdlib.h string.h strings.h sys/param.h sys/time.h unistd.h wchar.h])
 
 # Checks for library functions.
+AC_FUNC_ALLOCA
+AC_FUNC_FORK
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([gettimeofday isascii])
+AC_CHECK_FUNCS([nl_langinfo strcspn strstr ])
 AC_SUBST(ac_aux_dir)
 
 # Checks for anthy
-AC_CHECK_HEADER(anthy/anthy.h, [], [AC_MSG_ERROR(anthy/anthy.h was not found.)])
-ANTHY_LIBS="-lanthy -lanthydic"
-ANTHY_CFLAGS=""
-AC_SUBST(ANTHY_LIBS)
-AC_SUBST(ANTHY_CFLAGS)
+ANTHY_VERSION=7500
+PKG_CHECK_MODULES(ANTHY,[anthy >= $ANTHY_VERSION])
 
 # Check gtk2
-PKG_CHECK_MODULES(GTK2, [gtk+-2.0 >= 2.4.0],
+PKG_CHECK_MODULES(GTK2, [gtk+-2.0 >= 2.8.0],
                         [HAS_GTK=yes],
                         [HAS_GTK=no])
 

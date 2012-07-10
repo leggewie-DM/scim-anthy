@@ -47,8 +47,10 @@ noinst_HEADERS = \
 	scim_anthy_table_editor.h \
 	scim_anthy_utils.h \
 	scim_anthy_color_button.h \
-	scim_anthy_helper.h
-
+	scim_anthy_helper.h \
+	scim_anthy_diction.h \
+	scim_anthy_tray.h \
+	scim_anthy_const.h
 
 #
 # IMEngine Module
@@ -69,7 +71,8 @@ anthy_la_SOURCES = \
 	scim_anthy_nicola.cpp \
 	scim_anthy_default_tables.cpp \
 	scim_anthy_style_file.cpp \
-	scim_anthy_utils.cpp
+	scim_anthy_utils.cpp \
+	scim_anthy_diction.cpp
 
 anthy_la_CFLAGS   = @SCIM_CFLAGS@ @SCIM_DEBUG_FLAGS@ @ANTHY_CFLAGS@
 anthy_la_CXXFLAGS = @SCIM_CFLAGS@ @SCIM_DEBUG_FLAGS@ @ANTHY_CFLAGS@
@@ -128,7 +131,13 @@ endif
 helpermoduledir          = @SCIM_MODULEDIR@/Helper
 helpermodule_LTLIBRARIES = $(HELPER_MODULE)
 
+if SCIM_BUILD_TRAY
+anthy_imengine_helper_la_SOURCES  = scim_anthy_helper.cpp \
+				    scim_anthy_tray.cpp
+else
 anthy_imengine_helper_la_SOURCES  = scim_anthy_helper.cpp
+endif
+
 anthy_imengine_helper_la_CFLAGS   = @GTK2_CFLAGS@ \
 				    @SCIM_CFLAGS@ \
 				    @SCIM_DEBUG_FLAGS@
@@ -141,4 +150,5 @@ anthy_imengine_helper_la_LDFLAGS  = -avoid-version \
 				    @LIBTOOL_EXPORT_OPTIONS@ \
 				    @GTK2_LIBS@ \
 				    @INTLLIBS@ \
-				    @SCIM_LIBS@
+				    @SCIM_LIBS@ \
+				    @SCIM_GTKUTILS_LIBS@
