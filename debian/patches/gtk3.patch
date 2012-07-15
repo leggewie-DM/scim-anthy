@@ -1,5 +1,73 @@
+diff --git a/configure.ac b/configure.ac
+index 5f5ba1d..082818f 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -60,14 +60,18 @@ PKG_CHECK_MODULES(SCIM_GTKUTILS,[scim-gtkutils >= $SCIM_VERSION],
+ AC_SUBST(SCIM_VERSION)
+ 
+ AM_CONDITIONAL(SCIM_BUILD_SETUP, [test "$SCIM_HAS_GTKUTILS" = "yes"])
++AM_CONDITIONAL(SCIM_BUILD_HELPER, [test "$SCIM_HAS_GTKUTILS" = "yes"])
+ 
+ if test "$SCIM_HAS_GTKUTILS" = "yes"; then
+   SCIM_BUILD_SETUP=1
++  SCIM_BUILD_HELPER=1
+ else
+   SCIM_BUILD_SETUP=0
++  SCIM_BUILD_HELPER=0
+ fi
+ 
+ AC_SUBST(SCIM_BUILD_SETUP)
++AC_SUBST(SCIM_BUILD_HELPER)
+ 
+ # Checks for header files.
+ AC_HEADER_STDC
+@@ -84,21 +88,6 @@ ANTHY_CFLAGS=""
+ AC_SUBST(ANTHY_LIBS)
+ AC_SUBST(ANTHY_CFLAGS)
+ 
+-# Check gtk2
+-PKG_CHECK_MODULES(GTK2, [gtk+-2.0 >= 2.4.0],
+-                        [HAS_GTK=yes],
+-                        [HAS_GTK=no])
+-
+-AM_CONDITIONAL(SCIM_BUILD_HELPER, [test "$HAS_GTK" = "yes"])
+-
+-if test "$HAS_GTK" = "yes"; then
+-  SCIM_BUILD_HELPER=1
+-else
+-  SCIM_BUILD_HELPER=0
+-fi
+-
+-AC_SUBST(SCIM_BUILD_HELPER)
+-
+ # libtool option to control which symbols are exported
+ # right now, symbols starting with _ are not exported
+ LIBTOOL_EXPORT_OPTIONS='-export-symbols-regex "^[[^_]].*"'
+diff --git a/src/Makefile.am b/src/Makefile.am
+index aac7849..3f48b3b 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -127,15 +127,15 @@ helpermoduledir          = @SCIM_MODULEDIR@/Helper
+ helpermodule_LTLIBRARIES = $(HELPER_MODULE)
+ 
+ anthy_imengine_helper_la_SOURCES  = scim_anthy_helper.cpp
+-anthy_imengine_helper_la_CFLAGS   = @GTK2_CFLAGS@ \
++anthy_imengine_helper_la_CFLAGS   = @SCIM_GTKUTILS_CFLAGS@ \
+ 				    @SCIM_CFLAGS@ \
+ 				    @SCIM_DEBUG_FLAGS@
+-anthy_imengine_helper_la_CXXFLAGS = @GTK2_CFLAGS@ \
++anthy_imengine_helper_la_CXXFLAGS = @SCIM_GTKUTILS_CFLAGS@ \
+ 				    @SCIM_CFLAGS@ \
+ 				    @SCIM_DEBUG_FLAGS@
+ anthy_imengine_helper_la_LDFLAGS  = -avoid-version \
+                                     -module \
+ 				    @LIBTOOL_EXPORT_OPTIONS@ \
+-				    @GTK2_LIBS@ \
++				    @SCIM_GTKUTILS_LIBS@ \
+ 				    @INTLLIBS@ \
+ 				    @SCIM_LIBS@
 diff --git a/src/scim_anthy_color_button.cpp b/src/scim_anthy_color_button.cpp
-index 841c9aa..f7cfb8c 100644
+index 841c9aa..7606523 100644
 --- a/src/scim_anthy_color_button.cpp
 +++ b/src/scim_anthy_color_button.cpp
 @@ -58,9 +58,14 @@ typedef enum
@@ -47,8 +115,8 @@ index 841c9aa..f7cfb8c 100644
  {
      /*set default color */ 
 +#if GTK_CHECK_VERSION(3, 0, 0)
-+    gdk_rgba_parse (&object->fg_color, "000000");
-+    gdk_rgba_parse (&object->bg_color, "ffffff");
++    gdk_rgba_parse (&object->fg_color, "#000000");
++    gdk_rgba_parse (&object->bg_color, "#ffffff");
 +#else
      gdk_color_parse ("#000000", &object->fg_color);
      gdk_color_parse ("#ffffff", &object->bg_color);
@@ -108,7 +176,7 @@ index 841c9aa..f7cfb8c 100644
      gint    rowstride;
      guchar  r, g, b;
      gint    xx, yy;
-@@ -201,23 +239,40 @@ scim_anthy_color_button_draw_rect (ScimAnthyColorButton *button,
+@@ -201,23 +239,38 @@ scim_anthy_color_button_draw_rect (ScimAnthyColorButton *button,
                          GDK_RGB_DITHER_MAX,
                          button->render_buf,
                          rowstride);
@@ -130,7 +198,7 @@ index 841c9aa..f7cfb8c 100644
      gint            rect_w, rect_h;
    
 +#if GTK_CHECK_VERSION(2, 18, 0)
-+      if (gtk_widget_is_drawable (widget))
++      if (!gtk_widget_is_drawable (widget))
 +#else
      if (!GTK_WIDGET_DRAWABLE (widget))
 +#endif
@@ -138,10 +206,8 @@ index 841c9aa..f7cfb8c 100644
 -  
 +
 +#if GTK_CHECK_VERSION(3, 0, 0)
-+    GtkAllocation allocation;
-+    gtk_widget_get_allocation (widget, &allocation);
-+    width = allocation.width;
-+    height = allocation.height;
++    width = gdk_window_get_width(gtk_widget_get_window (widget));
++    height = gdk_window_get_height(gtk_widget_get_window (widget));
 +#else
      width  = widget->allocation.width;
      height = widget->allocation.height;
@@ -151,7 +217,7 @@ index 841c9aa..f7cfb8c 100644
      /*  draw the swap colors pixbuf  */
      if (!button->swap_icon) {
          button->swap_icon
-@@ -231,9 +286,14 @@ scim_anthy_color_button_expose (GtkWidget      *widget,
+@@ -231,9 +284,14 @@ scim_anthy_color_button_expose (GtkWidget      *widget,
      }  
  
      if (swap_w < width / 2 && swap_h < height / 2) {
@@ -166,8 +232,11 @@ index 841c9aa..f7cfb8c 100644
      } else {
          swap_w = swap_h = 0;
      }
-@@ -252,34 +312,76 @@ scim_anthy_color_button_expose (GtkWidget      *widget,
+@@ -249,37 +307,78 @@ scim_anthy_color_button_expose (GtkWidget      *widget,
+     button->rect_width  = rect_w;
+     button->rect_height = rect_h;
    
+-  
      /*  draw the background area  */
      scim_anthy_color_button_draw_rect (button,
 +#if GTK_CHECK_VERSION(2, 14, 0)
@@ -250,23 +319,25 @@ index 841c9aa..f7cfb8c 100644
    
      return TRUE;
  }
-@@ -289,8 +391,15 @@ scim_anthy_color_button_target (ScimAnthyColorButton *button,
+@@ -289,11 +388,16 @@ scim_anthy_color_button_target (ScimAnthyColorButton *button,
                            gint            x,
                            gint            y)
  {
 +#if GTK_CHECK_VERSION(3, 0, 0)
-+    GtkAllocation allocation;
-+    gtk_widget_get_allocation (GTK_WIDGET (button), &allocation);
-+    gint width = allocation.width;
-+    gint height = allocation.height;
++    gint width = gdk_window_get_width(gtk_widget_get_window (GTK_WIDGET(button)));
++    gint height = gdk_window_get_height(gtk_widget_get_window (GTK_WIDGET(button)));
 +#else
      gint width  = GTK_WIDGET (button)->allocation.width;
      gint height = GTK_WIDGET (button)->allocation.height;
 +#endif
      gint rect_w = button->rect_width;
      gint rect_h = button->rect_height;
-   
-@@ -314,7 +423,11 @@ scim_anthy_color_button_open_color_dialog (ScimAnthyColorButton *button, gboolea
+-  
++
+     if (x > 0 && x < rect_w && y > 0 && y < rect_h)
+         return FOREGROUND_AREA;
+     else if (x > (width - rect_w)  && x < width  &&
+@@ -314,7 +418,11 @@ scim_anthy_color_button_open_color_dialog (ScimAnthyColorButton *button, gboolea
  {
      GtkWidget *dialog;
      const gchar *title;
@@ -278,7 +349,7 @@ index 841c9aa..f7cfb8c 100644
      gint result;
    
      title = fg ? _("Foreground color") : _("Background color");
-@@ -322,16 +435,38 @@ scim_anthy_color_button_open_color_dialog (ScimAnthyColorButton *button, gboolea
+@@ -322,16 +430,38 @@ scim_anthy_color_button_open_color_dialog (ScimAnthyColorButton *button, gboolea
      
      dialog = gtk_color_selection_dialog_new (title);
  
@@ -321,7 +392,7 @@ index 841c9aa..f7cfb8c 100644
              g_signal_emit (button, button_signals[COLOR_CHANGED], 0);
              break;
          default:
-@@ -345,6 +480,11 @@ scim_anthy_color_button_open_color_dialog (ScimAnthyColorButton *button, gboolea
+@@ -345,6 +475,11 @@ scim_anthy_color_button_open_color_dialog (ScimAnthyColorButton *button, gboolea
  static void
  scim_anthy_color_button_swap_color (ScimAnthyColorButton *button)
  {
@@ -333,7 +404,7 @@ index 841c9aa..f7cfb8c 100644
      GdkColor tmp;
      tmp.red   = button->fg_color.red;
      tmp.green = button->fg_color.green;
-@@ -357,6 +497,7 @@ scim_anthy_color_button_swap_color (ScimAnthyColorButton *button)
+@@ -357,6 +492,7 @@ scim_anthy_color_button_swap_color (ScimAnthyColorButton *button)
      button->bg_color.red   = tmp.red;
      button->bg_color.green = tmp.green;
      button->bg_color.blue  = tmp.blue;
@@ -341,14 +412,14 @@ index 841c9aa..f7cfb8c 100644
      g_signal_emit (button, button_signals[COLOR_CHANGED], 0);
  }
  
-@@ -447,14 +588,28 @@ scim_anthy_color_button_get_colors (ScimAnthyColorButton *button,
+@@ -447,14 +583,29 @@ scim_anthy_color_button_get_colors (ScimAnthyColorButton *button,
  
      g_snprintf (fg_color_str, G_N_ELEMENTS (fg_color_str),
                  "#%02X%02X%02X", 
 +#if GTK_CHECK_VERSION(3, 0, 0)
-+                static_cast<unsigned char>(255*button->fg_color.red),
-+                static_cast<unsigned char>(255*button->fg_color.green),
-+                static_cast<unsigned char>(255*button->fg_color.blue)
++                static_cast<unsigned int>(255*button->fg_color.red),
++                static_cast<unsigned int>(255*button->fg_color.green),
++                static_cast<unsigned int>(255*button->fg_color.blue)
 +#else
                  ((button->fg_color.red)>>8),
                  ((button->fg_color.green)>>8),
@@ -359,9 +430,9 @@ index 841c9aa..f7cfb8c 100644
      g_snprintf (bg_color_str, G_N_ELEMENTS (bg_color_str),
                  "#%02X%02X%02X", 
 +#if GTK_CHECK_VERSION(3, 0, 0)
-+                static_cast<unsigned char>(255*button->bg_color.red),
-+                static_cast<unsigned char>(255*button->bg_color.green),
-+                static_cast<unsigned char>(255*button->bg_color.blue)
++                static_cast<unsigned int>(255*button->bg_color.red),
++                static_cast<unsigned int>(255*button->bg_color.green),
++                static_cast<unsigned int>(255*button->bg_color.blue)
 +#else
                  ((button->bg_color.red)>>8),
                  ((button->bg_color.green)>>8),
@@ -369,27 +440,22 @@ index 841c9aa..f7cfb8c 100644
 +                ((button->bg_color.blue)>>8)
 +#endif
 +                );
++
      *fg_value = String (fg_color_str); 
      *bg_value = String (bg_color_str); 
  
-@@ -466,6 +621,16 @@ scim_anthy_color_button_set_colors (ScimAnthyColorButton *button,
+@@ -466,6 +617,10 @@ scim_anthy_color_button_set_colors (ScimAnthyColorButton *button,
  				    const String &fg_value,
  				    const String &bg_value)
  {
 +#if GTK_CHECK_VERSION(3, 0, 0)
-+    const char *fg_str = fg_value.c_str();
-+    const char *bg_str = bg_value.c_str();
-+    if (fg_str[0] == '#')
-+        ++fg_str;
-+    if (bg_str[0] == '#')
-+        ++bg_str;
-+    gdk_rgba_parse (&button->fg_color, fg_str); 
-+    gdk_rgba_parse (&button->bg_color, bg_str); 
++    gdk_rgba_parse (&button->fg_color, fg_value.c_str()); 
++    gdk_rgba_parse (&button->bg_color, bg_value.c_str()); 
 +#else
      GdkColor fg_color, bg_color;
      gdk_color_parse (fg_value.c_str (), &fg_color);
      gdk_color_parse (bg_value.c_str (), &bg_color);
-@@ -476,6 +641,7 @@ scim_anthy_color_button_set_colors (ScimAnthyColorButton *button,
+@@ -476,6 +631,7 @@ scim_anthy_color_button_set_colors (ScimAnthyColorButton *button,
      button->bg_color.red   = bg_color.red;
      button->bg_color.green = bg_color.green;
      button->bg_color.blue  = bg_color.blue;
@@ -416,8 +482,107 @@ index f55083a..8d96ae7 100644
  };
  
  struct _ScimAnthyColorButtonClass
+diff --git a/src/scim_anthy_helper.cpp b/src/scim_anthy_helper.cpp
+index a0c0d30..5925d70 100644
+--- a/src/scim_anthy_helper.cpp
++++ b/src/scim_anthy_helper.cpp
+@@ -175,9 +175,9 @@ slot_imengine_event (const HelperAgent *agent, int ic,
+         if (!reader.get_data (id) || !reader.get_data (time_msec))
+             break;
+         TimeoutContext *ctx = new TimeoutContext (ic, uuid, id);
+-        guint timeout_id = gtk_timeout_add_full (time_msec,
++        guint timeout_id = g_timeout_add_full (G_PRIORITY_DEFAULT,
++												 time_msec,
+                                                  timeout_func,
+-                                                 NULL,
+                                                  (gpointer) ctx,
+                                                  timeout_ctx_destroy_func);
+         timeout_ids[ic][id] = timeout_id;
+@@ -191,7 +191,7 @@ slot_imengine_event (const HelperAgent *agent, int ic,
+             timeout_ids[ic].find (id) != timeout_ids[ic].end ())
+         {
+             guint tid = timeout_ids[ic][id];
+-            gtk_timeout_remove (tid);
++            g_source_remove (tid);
+         }
+         break;
+     }
+@@ -234,8 +234,8 @@ run (const String &display, const ConfigPointer &config)
+     char **argv = new char * [4];
+     int    argc = 3;
+ 
+-    argv [0] = "anthy-imengine-helper";
+-    argv [1] = "--display";
++    argv [0] = const_cast<char*> ("anthy-imengine-helper");
++    argv [1] = const_cast<char*> ("--display");
+     argv [2] = const_cast<char *> (display.c_str ());
+     argv [3] = 0;
+  
+diff --git a/src/scim_anthy_prefs.cpp b/src/scim_anthy_prefs.cpp
+index 7d58ef1..596f990 100644
+--- a/src/scim_anthy_prefs.cpp
++++ b/src/scim_anthy_prefs.cpp
+@@ -95,6 +95,7 @@ BoolConfigData config_bool_common [] =
+         N_("A_llow spliting romaji on editing preedit string"),
+         NULL,
+         N_("If this check is enabled, you can delete each letter."),
++        NULL,
+         false,
+     },
+     {
+@@ -104,6 +105,7 @@ BoolConfigData config_bool_common [] =
+         N_("_Entering the pseudo ASCII input mode with capital letters."),
+         NULL,
+         N_("If this check is enabled, capital letters will becomes a trigger to enter the pseudo ASCII input mode."),
++		NULL,
+         false,
+     },
+     {
+@@ -113,6 +115,7 @@ BoolConfigData config_bool_common [] =
+         N_("Insert a _blank with a blank key."),
+         NULL,
+         N_("If this check is enabled, a blank key will works to insert a blank when entering the pseudo ASCII input mode."),
++		NULL,
+         false,
+     },
+     {
+@@ -122,6 +125,7 @@ BoolConfigData config_bool_common [] =
+         N_("_Show predicted candidates while inputting letters"),
+         NULL,
+         NULL,
++        NULL,
+         false,
+     },
+     {
+@@ -131,6 +135,7 @@ BoolConfigData config_bool_common [] =
+         N_("Use _direct select keys while predicting"),
+         NULL,
+         NULL,
++		NULL,
+         false,
+     },
+     {
+@@ -215,8 +220,8 @@ BoolConfigData config_bool_common [] =
+     },
+     {
+         NULL,
+-        "",
+-        "",
++        false,
++        false,
+         NULL,
+         NULL,
+         NULL,
+@@ -273,6 +278,7 @@ IntConfigData config_int_common [] =
+         NULL,
+         NULL,
+         NULL,
++		NULL,
+         false,
+     },
+ };
 diff --git a/src/scim_anthy_setup.cpp b/src/scim_anthy_setup.cpp
-index 942e852..aa7e130 100644
+index 942e852..2ee5358 100644
 --- a/src/scim_anthy_setup.cpp
 +++ b/src/scim_anthy_setup.cpp
 @@ -174,7 +174,10 @@ static GtkWidget   * __widget_key_filter_button     = NULL;
@@ -468,7 +633,7 @@ index 942e852..aa7e130 100644
                                                     gpointer          user_data);
  static void     on_key_list_selection_changed     (GtkTreeSelection *selection,
                                                     gpointer          data);
-@@ -364,11 +367,18 @@ create_check_button (const char *config_key)
+@@ -364,11 +367,19 @@ create_check_button (const char *config_key)
                        entry);
      gtk_widget_show (GTK_WIDGET (entry->widget));
  
@@ -479,7 +644,8 @@ index 942e852..aa7e130 100644
 +#endif
      if (entry->tooltip)
 +#if GTK_CHECK_VERSION(3, 0, 0)
-+        gtk_widget_set_tooltip_text (GTK_WIDGET (entry->widget), _(entry->tooltip));
++        gtk_widget_set_tooltip_text (GTK_WIDGET (entry->widget),
++                              _(entry->tooltip));
 +#else
          gtk_tooltips_set_tip (__widget_tooltips, GTK_WIDGET (entry->widget),
                                _(entry->tooltip), NULL);
@@ -487,7 +653,7 @@ index 942e852..aa7e130 100644
  
      return GTK_WIDGET (entry->widget);
  }
-@@ -389,7 +399,11 @@ create_spin_button (const char *config_key, GtkTable *table, int idx)
+@@ -389,7 +400,11 @@ create_spin_button (const char *config_key, GtkTable *table, int idx)
                        4, 4);
      gtk_widget_show (GTK_WIDGET (label));
  
@@ -499,7 +665,7 @@ index 942e852..aa7e130 100644
      gtk_table_attach (GTK_TABLE (table), GTK_WIDGET (hbox),
                        1, 2, idx, idx + 1,
                        (GtkAttachOptions) GTK_FILL,
-@@ -417,11 +431,18 @@ create_spin_button (const char *config_key, GtkTable *table, int idx)
+@@ -417,11 +432,18 @@ create_spin_button (const char *config_key, GtkTable *table, int idx)
          gtk_widget_show (GTK_WIDGET (label));
      }
  
@@ -518,7 +684,7 @@ index 942e852..aa7e130 100644
  
      return GTK_WIDGET (entry->widget);
  }
-@@ -453,11 +474,18 @@ create_entry (const char *config_key, GtkTable *table, int idx)
+@@ -453,11 +475,18 @@ create_entry (const char *config_key, GtkTable *table, int idx)
                        (GtkAttachOptions) (GTK_FILL|GTK_EXPAND),
                        (GtkAttachOptions) (GTK_FILL), 4, 4);
  
@@ -537,31 +703,40 @@ index 942e852..aa7e130 100644
  
      return GTK_WIDGET (entry->widget);
  }
-@@ -480,6 +508,23 @@ create_combo (const char *config_key, gpointer candidates_p,
+@@ -480,12 +509,31 @@ create_combo (const char *config_key, gpointer candidates_p,
                        (GtkAttachOptions) (GTK_FILL), 4, 4);
      gtk_widget_show (label);
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    entry->widget = gtk_combo_box_text_new_with_entry ();
-+    gtk_label_set_mnemonic_widget (GTK_LABEL (label), GTK_WIDGET (entry->widget));
++    GtkWidget *combo_box_entry = gtk_bin_get_child (GTK_BIN (entry->widget));
++    gtk_label_set_mnemonic_widget (GTK_LABEL (label), combo_box_entry);
++    gtk_editable_set_editable (GTK_EDITABLE (combo_box_entry), FALSE);
 +
 +    gtk_widget_show (GTK_WIDGET (entry->widget));
 +    gtk_table_attach (GTK_TABLE (table), GTK_WIDGET (entry->widget),
 +                      1, 2, idx, idx + 1,
 +                      (GtkAttachOptions) (GTK_FILL|GTK_EXPAND),
 +                      (GtkAttachOptions) (GTK_FILL), 4, 4);
-+    g_object_set_data (G_OBJECT (entry->widget),
++    g_object_set_data (G_OBJECT (combo_box_entry),
 +                       DATA_POINTER_KEY,
 +                       (gpointer) candidates_p);
 +
-+    g_signal_connect ((gpointer) GTK_COMBO_BOX_TEXT (entry->widget), "changed",
++    g_signal_connect (G_OBJECT (combo_box_entry), "changed",
 +                      G_CALLBACK (on_default_combo_changed),
 +                      entry);
 +#else
      entry->widget = gtk_combo_new ();
      gtk_label_set_mnemonic_widget (GTK_LABEL (label),
                                     GTK_COMBO (entry->widget)->entry);
-@@ -499,13 +544,21 @@ create_combo (const char *config_key, gpointer candidates_p,
+     gtk_combo_set_value_in_list (GTK_COMBO (entry->widget), TRUE, FALSE);
+     gtk_combo_set_case_sensitive (GTK_COMBO (entry->widget), TRUE);
+-    gtk_entry_set_editable (GTK_ENTRY (GTK_COMBO (entry->widget)->entry),
++    gtk_editable_set_editable (GTK_EDITABLE (GTK_COMBO (entry->widget)->entry),
+                             FALSE);
+     gtk_widget_show (GTK_WIDGET (entry->widget));
+     gtk_table_attach (GTK_TABLE (table), GTK_WIDGET (entry->widget),
+@@ -499,13 +547,22 @@ create_combo (const char *config_key, gpointer candidates_p,
      g_signal_connect ((gpointer) GTK_COMBO (entry->widget)->entry, "changed",
                        G_CALLBACK (on_default_combo_changed),
                        entry);
@@ -574,7 +749,8 @@ index 942e852..aa7e130 100644
 +#endif
      if (entry->tooltip)
 +#if GTK_CHECK_VERSION(3, 0, 0)
-+        gtk_widget_set_tooltip_text (GTK_WIDGET (entry->widget), _(entry->tooltip));
++        gtk_widget_set_tooltip_text (
++            gtk_bin_get_child (GTK_BIN (entry->widget)), _(entry->tooltip));
 +#else
          gtk_tooltips_set_tip (__widget_tooltips,
                                GTK_WIDGET (GTK_COMBO (entry->widget)->entry),
@@ -583,11 +759,11 @@ index 942e852..aa7e130 100644
  
      return GTK_WIDGET (entry->widget);
  }
-@@ -528,6 +581,29 @@ create_option_menu (const char *config_key, gpointer candidates_p,
+@@ -528,6 +585,29 @@ create_option_menu (const char *config_key, gpointer candidates_p,
                        (GtkAttachOptions) (GTK_FILL), 4, 4);
      gtk_widget_show (label);
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    entry->widget = gtk_combo_box_text_new ();
 +    gtk_label_set_mnemonic_widget (GTK_LABEL (label),
 +                                   GTK_WIDGET (entry->widget));
@@ -613,16 +789,7 @@ index 942e852..aa7e130 100644
      entry->widget = gtk_option_menu_new ();
      gtk_label_set_mnemonic_widget (GTK_LABEL (label),
                                     GTK_WIDGET (entry->widget));
-@@ -546,7 +622,7 @@ create_option_menu (const char *config_key, gpointer candidates_p,
- 
-     for (unsigned int i = 0; data[i].label; i++) {
-         GtkWidget *menuitem = gtk_menu_item_new_with_label (_(data[i].label));
--        gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
-+        gtk_menu_shell_append_text (GTK_MENU_SHELL (menu), menuitem);
-         gtk_widget_show (menuitem);
-     }
- 
-@@ -555,12 +631,20 @@ create_option_menu (const char *config_key, gpointer candidates_p,
+@@ -555,12 +635,20 @@ create_option_menu (const char *config_key, gpointer candidates_p,
      g_signal_connect ((gpointer) GTK_OPTION_MENU (entry->widget), "changed",
                        G_CALLBACK (on_default_option_menu_changed),
                        entry);
@@ -643,7 +810,7 @@ index 942e852..aa7e130 100644
  
      return GTK_WIDGET (entry->widget);
  }
-@@ -590,7 +674,11 @@ create_color_button (const char *config_key)
+@@ -590,7 +678,11 @@ create_color_button (const char *config_key)
      if (!entry)
          return NULL;
  
@@ -655,7 +822,7 @@ index 942e852..aa7e130 100644
      gtk_container_set_border_width (GTK_CONTAINER (hbox), 4);
      gtk_widget_show (hbox);
  
-@@ -614,11 +702,18 @@ create_color_button (const char *config_key)
+@@ -614,11 +706,18 @@ create_color_button (const char *config_key)
          gtk_label_set_mnemonic_widget (GTK_LABEL (label),
                                         GTK_WIDGET (entry->widget));
  
@@ -674,11 +841,11 @@ index 942e852..aa7e130 100644
  
      return hbox;
  }
-@@ -701,9 +796,15 @@ key_list_view_popup_key_selection (GtkTreeView *treeview)
+@@ -701,9 +800,15 @@ key_list_view_popup_key_selection (GtkTreeView *treeview)
                  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
                                      COLUMN_VALUE, data->value.c_str(),
                                      -1);
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +                gtk_combo_box_set_active(
 +                    GTK_COMBO_BOX (__widget_key_theme_menu),
 +                    KEY_THEME_INDEX_USER_DEFINED);
@@ -690,7 +857,7 @@ index 942e852..aa7e130 100644
                  data->changed = true;
                  __config_changed = true;
              }
-@@ -718,7 +819,11 @@ create_common_page (void)
+@@ -718,7 +823,11 @@ create_common_page (void)
  {
      GtkWidget *vbox, *table, *widget;
  
@@ -702,7 +869,7 @@ index 942e852..aa7e130 100644
      gtk_widget_show (vbox);
  
      table = gtk_table_new (7, 2, FALSE);
-@@ -753,7 +858,11 @@ create_symbols_page (void)
+@@ -753,7 +862,11 @@ create_symbols_page (void)
  {
      GtkWidget *vbox, *table, *widget;
  
@@ -714,7 +881,7 @@ index 942e852..aa7e130 100644
      gtk_widget_show (vbox);
  
      table = gtk_table_new (7, 2, FALSE);
-@@ -793,10 +902,18 @@ create_keyboard_page (void)
+@@ -793,10 +906,18 @@ create_keyboard_page (void)
  {
      GtkWidget *vbox, *hbox;
  
@@ -733,11 +900,11 @@ index 942e852..aa7e130 100644
      gtk_container_set_border_width (GTK_CONTAINER (hbox), 4);
      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
      gtk_widget_show(hbox);
-@@ -806,6 +923,32 @@ create_keyboard_page (void)
+@@ -806,6 +927,28 @@ create_keyboard_page (void)
      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
      gtk_widget_show (label);
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    GtkWidget *omenu = gtk_combo_box_text_new ();
 +    __widget_key_categories_menu = omenu;
 +    gtk_box_pack_start (GTK_BOX (hbox), omenu, FALSE, FALSE, 2);
@@ -745,9 +912,9 @@ index 942e852..aa7e130 100644
 +
 +    gtk_label_set_mnemonic_widget (GTK_LABEL (label), omenu);
 +
-+    GtkWidget *menu = gtk_menu_new ();
-+
-+    GtkWidget *menuitem;
++    gtk_combo_box_text_append_text
++        (GTK_COMBO_BOX_TEXT (omenu),
++        _("All"));
 +
 +    for (unsigned int i = 0; i < __key_conf_pages_num; i++) {
 +        gtk_combo_box_text_append_text
@@ -758,10 +925,6 @@ index 942e852..aa7e130 100644
 +    gtk_combo_box_text_append_text
 +        (GTK_COMBO_BOX_TEXT (omenu),
 +        _("Search by key"));
-+
-+    gtk_combo_box_text_append_text
-+        (GTK_COMBO_BOX_TEXT (omenu),
-+        _("all"));
 +#else
      GtkWidget *omenu = gtk_option_menu_new ();
      __widget_key_categories_menu = omenu;
@@ -791,21 +954,19 @@ index 942e852..aa7e130 100644
      gtk_container_set_border_width (GTK_CONTAINER (hbox), 4);
      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
      gtk_widget_show(hbox);
-@@ -915,8 +1063,13 @@ create_keyboard_page (void)
+@@ -915,7 +1063,11 @@ create_keyboard_page (void)
      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
      gtk_widget_show (label);
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    omenu = gtk_combo_box_text_new ();
-+    __widget_key_theme_menu = omenu;
 +#else
      omenu = gtk_option_menu_new ();
-     __widget_key_theme_menu = omenu;
 +#endif
+     __widget_key_theme_menu = omenu;
      g_signal_connect (G_OBJECT (omenu), "changed",
                        G_CALLBACK (on_key_theme_menu_changed), NULL);
-     gtk_box_pack_start (GTK_BOX (hbox), omenu, FALSE, FALSE, 2);
-@@ -945,10 +1098,18 @@ create_learning_page ()
+@@ -945,10 +1097,18 @@ create_learning_page ()
      GtkWidget *vbox, *vbox2, *hbox, *alignment, *table;
      GtkWidget *widget, *label;
  
@@ -824,7 +985,7 @@ index 942e852..aa7e130 100644
      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 4);
      gtk_widget_show (hbox);
  
-@@ -962,7 +1123,11 @@ create_learning_page ()
+@@ -962,7 +1122,11 @@ create_learning_page ()
      gtk_box_pack_start (GTK_BOX (vbox), alignment, FALSE, FALSE, 0);
      gtk_widget_show (alignment);
  
@@ -836,7 +997,7 @@ index 942e852..aa7e130 100644
      gtk_container_add (GTK_CONTAINER (alignment), vbox2);
      gtk_widget_show (vbox2);
  
-@@ -975,7 +1140,11 @@ create_learning_page ()
+@@ -975,7 +1139,11 @@ create_learning_page ()
      gtk_box_pack_start (GTK_BOX (vbox2), widget, FALSE, FALSE, 4);
  
      /* key preference */
@@ -848,7 +1009,7 @@ index 942e852..aa7e130 100644
      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 4);
      gtk_widget_show (hbox);
  
-@@ -1008,7 +1177,7 @@ create_learning_page ()
+@@ -1008,7 +1176,7 @@ create_learning_page ()
      {
          StringConfigData *entry = entries[i];
          widget = create_entry (entry->key, GTK_TABLE (table), i);
@@ -857,7 +1018,7 @@ index 942e852..aa7e130 100644
          create_key_select_button (entry->key, GTK_TABLE (table), i);
      }
  
-@@ -1020,7 +1189,11 @@ create_prediction_page ()
+@@ -1020,7 +1188,11 @@ create_prediction_page ()
  {
      GtkWidget *vbox, *widget;
  
@@ -869,7 +1030,7 @@ index 942e852..aa7e130 100644
      gtk_widget_show (vbox);
  
      /* predict while inputting */
-@@ -1084,7 +1257,11 @@ create_candidates_window_page (void)
+@@ -1084,7 +1256,11 @@ create_candidates_window_page (void)
  {
      GtkWidget *vbox, *widget, *table;
  
@@ -881,7 +1042,7 @@ index 942e852..aa7e130 100644
      gtk_widget_show (vbox);
  
      /* show candidates label */
-@@ -1115,7 +1292,11 @@ create_toolbar_page (void)
+@@ -1115,7 +1291,11 @@ create_toolbar_page (void)
  {
      GtkWidget *vbox, *hbox, *label, *widget;
  
@@ -893,7 +1054,7 @@ index 942e852..aa7e130 100644
      gtk_widget_show (vbox);
  
      /* show/hide toolbar label */
-@@ -1141,7 +1322,11 @@ create_toolbar_page (void)
+@@ -1141,7 +1321,11 @@ create_toolbar_page (void)
                        NULL);
      gtk_box_pack_start (GTK_BOX (vbox), widget, FALSE, FALSE, 2);
  
@@ -905,7 +1066,7 @@ index 942e852..aa7e130 100644
      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
      gtk_widget_show (hbox);
      label = gtk_label_new ("    ");
-@@ -1166,7 +1351,11 @@ create_appearance_page (void)
+@@ -1166,7 +1350,11 @@ create_appearance_page (void)
  {
      GtkWidget *vbox, *table, *omenu, *widget, *hbox; 
  
@@ -917,7 +1078,7 @@ index 942e852..aa7e130 100644
      gtk_widget_show (vbox);
  
      table = gtk_table_new (2, 3, FALSE);
-@@ -1178,7 +1367,11 @@ create_appearance_page (void)
+@@ -1178,7 +1366,11 @@ create_appearance_page (void)
                                  &preedit_style, GTK_TABLE (table), 0);
  
      /* preedit color */
@@ -929,16 +1090,20 @@ index 942e852..aa7e130 100644
      gtk_widget_show (hbox);
      widget = create_color_button (SCIM_ANTHY_CONFIG_PREEDIT_FG_COLOR);
      gtk_box_pack_start (GTK_BOX (hbox), widget, FALSE, FALSE, 0);
-@@ -1187,7 +1380,7 @@ create_appearance_page (void)
+@@ -1187,15 +1379,24 @@ create_appearance_page (void)
                        (GtkAttachOptions) (GTK_FILL), 4, 4);
      gtk_widget_set_sensitive (hbox, FALSE);
  
--    g_signal_connect ((gpointer) GTK_OPTION_MENU (omenu), "changed",
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    g_signal_connect (G_OBJECT (omenu), "changed",
++                      G_CALLBACK (on_preedit_style_menu_changed), hbox);
++#else
+     g_signal_connect ((gpointer) GTK_OPTION_MENU (omenu), "changed",
                        G_CALLBACK (on_preedit_style_menu_changed), hbox);
++#endif
  
      /* conversion style */
-@@ -1195,7 +1388,11 @@ create_appearance_page (void)
+     omenu = create_option_menu (SCIM_ANTHY_CONFIG_CONVERSION_STYLE,
                                  &preedit_style, GTK_TABLE (table), 1);
  
      /* conversion color */
@@ -950,16 +1115,20 @@ index 942e852..aa7e130 100644
      gtk_widget_show (hbox);
      widget = create_color_button (SCIM_ANTHY_CONFIG_CONVERSION_FG_COLOR);
      gtk_box_pack_start (GTK_BOX (hbox), widget, FALSE, FALSE, 0);
-@@ -1204,7 +1401,7 @@ create_appearance_page (void)
+@@ -1204,15 +1405,24 @@ create_appearance_page (void)
                        (GtkAttachOptions) (GTK_FILL), 4, 4);
      gtk_widget_set_sensitive (hbox, FALSE);
  
--    g_signal_connect ((gpointer) GTK_OPTION_MENU (omenu), "changed",
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    g_signal_connect (G_OBJECT (omenu), "changed",
++                      G_CALLBACK (on_preedit_style_menu_changed), hbox);
++#else
+     g_signal_connect ((gpointer) GTK_OPTION_MENU (omenu), "changed",
                        G_CALLBACK (on_preedit_style_menu_changed), hbox);
++#endif
  
      /* selected segment style */
-@@ -1212,7 +1409,11 @@ create_appearance_page (void)
+     omenu = create_option_menu (SCIM_ANTHY_CONFIG_SELECTED_SEGMENT_STYLE,
                                  &preedit_style, GTK_TABLE (table), 2);
  
      /* selected segment color */
@@ -971,16 +1140,21 @@ index 942e852..aa7e130 100644
      gtk_widget_show (hbox);
      widget = create_color_button (SCIM_ANTHY_CONFIG_SELECTED_SEGMENT_FG_COLOR);
      gtk_box_pack_start (GTK_BOX (hbox), widget, FALSE, FALSE, 0);
-@@ -1221,7 +1422,7 @@ create_appearance_page (void)
+@@ -1221,8 +1431,13 @@ create_appearance_page (void)
                        (GtkAttachOptions) (GTK_FILL), 4, 4);
      gtk_widget_set_sensitive (hbox, FALSE);
  
--    g_signal_connect ((gpointer) GTK_OPTION_MENU (omenu), "changed",
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    g_signal_connect (G_OBJECT (omenu), "changed",
++                      G_CALLBACK (on_preedit_style_menu_changed), hbox);
++#else
+     g_signal_connect ((gpointer) GTK_OPTION_MENU (omenu), "changed",
                        G_CALLBACK (on_preedit_style_menu_changed), hbox);
++#endif
  
      return vbox;
-@@ -1233,7 +1434,11 @@ create_about_page ()
+ }
+@@ -1233,7 +1448,11 @@ create_about_page ()
      GtkWidget *vbox, *label;
      gchar str[256];
  
@@ -992,17 +1166,17 @@ index 942e852..aa7e130 100644
      gtk_widget_show (vbox);
  
      g_snprintf (
-@@ -1355,8 +1560,23 @@ create_setup_window (void)
+@@ -1355,8 +1574,24 @@ create_setup_window (void)
  }
  
  static void
 -setup_combo_value (GtkCombo *combo, const String & str)
 +setup_combo_value (GtkWidget *combo, const String & str)
  {
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    ComboConfigCandidate *data
 +        = static_cast<ComboConfigCandidate*>
-+        (g_object_get_data (G_OBJECT (combo),
++        (g_object_get_data (G_OBJECT (gtk_bin_get_child (GTK_BIN (combo))),
 +                            DATA_POINTER_KEY));
 +
 +    gint default_index = -1;
@@ -1011,16 +1185,24 @@ index 942e852..aa7e130 100644
 +        if (!strcmp (data[i].data, str.c_str ()))
 +            default_index = i;
 +    }
++
 +    if (default_index != -1)
 +        gtk_combo_box_set_active (GTK_COMBO_BOX (combo), default_index);
 +#else
      GList *list = NULL;
      const char *defval = NULL;
  
-@@ -1376,10 +1596,11 @@ setup_combo_value (GtkCombo *combo, const String & str)
+@@ -1371,15 +1606,16 @@ setup_combo_value (GtkCombo *combo, const String & str)
+             defval = _(data[i].label);
+     }
+ 
+-    gtk_combo_set_popdown_strings (combo, list);
++    gtk_combo_set_popdown_strings (GTK_COMBO (combo), list);
+     g_list_free (list);
  
      if (defval)
-         gtk_entry_set_text (GTK_ENTRY (combo->entry), defval);
+-        gtk_entry_set_text (GTK_ENTRY (combo->entry), defval);
++        gtk_entry_set_text (GTK_ENTRY (GTK_COMBO(combo)->entry), defval);
 +#endif
  }
  
@@ -1030,14 +1212,15 @@ index 942e852..aa7e130 100644
  {
      ComboConfigCandidate *data
          = static_cast<ComboConfigCandidate*>
-@@ -1387,15 +1608,55 @@ setup_option_menu_value (GtkOptionMenu *omenu, const String & str)
+@@ -1387,15 +1623,55 @@ setup_option_menu_value (GtkOptionMenu *omenu, const String & str)
  
      for (unsigned int i = 0; data[i].label; i++) {
          if (!strcmp (data[i].data, str.c_str ())) {
-+#if GTK_CHECK_VERSION(2, 4, 0)
+-            gtk_option_menu_set_history (omenu, i);
++#if GTK_CHECK_VERSION(2, 24, 0)
 +            gtk_combo_box_set_active (GTK_COMBO_BOX (omenu), i);
 +#else
-             gtk_option_menu_set_history (omenu, i);
++            gtk_option_menu_set_history (GTK_OPTION_MENU (omenu), i);
 +#endif
              return;
          }
@@ -1048,7 +1231,7 @@ index 942e852..aa7e130 100644
 -setup_key_theme_menu (GtkOptionMenu *omenu)
 +setup_key_theme_menu (GtkWidget *omenu)
  {
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (omenu), _("User defined"));
 +    gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (omenu), _("Default"));
 +
@@ -1087,7 +1270,7 @@ index 942e852..aa7e130 100644
      GtkWidget *menu = gtk_menu_new ();
      gtk_option_menu_set_menu (GTK_OPTION_MENU (omenu),
                                menu);
-@@ -1459,6 +1720,7 @@ setup_key_theme_menu (GtkOptionMenu *omenu)
+@@ -1459,6 +1735,7 @@ setup_key_theme_menu (GtkOptionMenu *omenu)
      g_signal_handlers_unblock_by_func (G_OBJECT (omenu),
                                         (gpointer) (on_key_theme_menu_changed),
                                         NULL);
@@ -1095,34 +1278,38 @@ index 942e852..aa7e130 100644
  }
  
  static void
-@@ -1480,11 +1742,19 @@ setup_widget_value (void)
+@@ -1480,12 +1757,22 @@ setup_widget_value (void)
  
      for (unsigned int i = 0; config_string_common[i].key; i++) {
          StringConfigData &entry = config_string_common[i];
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +        if (entry.widget && GTK_IS_COMBO_BOX (entry.widget)) {
++            if (gtk_combo_box_get_has_entry (GTK_COMBO_BOX (entry.widget))) {
++                setup_combo_value (GTK_WIDGET (entry.widget), entry.value);
++            } else {
++                setup_option_menu_value (GTK_WIDGET (entry.widget), entry.value);
++            }
++        }
 +#else
          if (entry.widget && GTK_IS_OPTION_MENU (entry.widget)) {
 -            setup_option_menu_value (GTK_OPTION_MENU (entry.widget),
 -                                     entry.value);
-+#endif
 +            setup_option_menu_value (GTK_WIDGET (entry.widget), entry.value);
-+
-+#if GTK_CHECK_VERSION(2, 4, 0)
-+        } else if (entry.widget && GTK_IS_COMBO_BOX (entry.widget)) {
-+#else
          } else if (entry.widget && GTK_IS_COMBO (entry.widget)) {
 -            setup_combo_value (GTK_COMBO (entry.widget), entry.value);
-+#endif
+-        } else if (entry.widget && GTK_IS_ENTRY (entry.widget)) {
 +            setup_combo_value (GTK_WIDGET (entry.widget), entry.value);
-         } else if (entry.widget && GTK_IS_ENTRY (entry.widget)) {
++        }
++#endif
++        else if (entry.widget && GTK_IS_ENTRY (entry.widget)) {
              gtk_entry_set_text (GTK_ENTRY (entry.widget),
                                  entry.value.c_str ());
-@@ -1509,9 +1779,15 @@ setup_widget_value (void)
+         }
+@@ -1509,9 +1796,15 @@ setup_widget_value (void)
          }
      }
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_set_active
 +        (GTK_COMBO_BOX (__widget_key_categories_menu),
 +         KEY_CATEGORY_INDEX_ALL);
@@ -1134,7 +1321,7 @@ index 942e852..aa7e130 100644
      GtkTreeView *treeview = GTK_TREE_VIEW (__widget_key_list_view);
      GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
      gtk_list_store_clear (store);
-@@ -1521,7 +1797,7 @@ setup_widget_value (void)
+@@ -1521,7 +1814,7 @@ setup_widget_value (void)
      gtk_widget_set_sensitive (__widget_key_filter_button, FALSE);
  
      // setup option menu
@@ -1143,7 +1330,7 @@ index 942e852..aa7e130 100644
  }
  
  bool operator < (const StyleFile &left, const StyleFile &right)
-@@ -1822,7 +2098,7 @@ on_default_combo_changed (GtkEditable *editable,
+@@ -1822,7 +2115,7 @@ on_default_combo_changed (GtkEditable *editable,
  }
  
  static void
@@ -1152,12 +1339,12 @@ index 942e852..aa7e130 100644
  {
      StringConfigData *entry = static_cast<StringConfigData*> (user_data);
      ComboConfigCandidate *data = static_cast<ComboConfigCandidate*>
-@@ -1833,7 +2109,11 @@ on_default_option_menu_changed (GtkOptionMenu *omenu, gpointer user_data)
+@@ -1833,7 +2126,11 @@ on_default_option_menu_changed (GtkOptionMenu *omenu, gpointer user_data)
      if (!data) return;
  
      for (int i = 0; data[i].label; i++) {
 -        if (i == gtk_option_menu_get_history (omenu)) {
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +        if (i == gtk_combo_box_get_active (GTK_COMBO_BOX (omenu))) {
 +#else
 +        if (i == gtk_option_menu_get_history (GTK_OPTION_MENU (omenu))) {
@@ -1165,7 +1352,7 @@ index 942e852..aa7e130 100644
              entry->value     = data[i].data;
              entry->changed   = true;
              __config_changed = true;
-@@ -1843,11 +2123,15 @@ on_default_option_menu_changed (GtkOptionMenu *omenu, gpointer user_data)
+@@ -1843,11 +2140,15 @@ on_default_option_menu_changed (GtkOptionMenu *omenu, gpointer user_data)
  }
  
  static void
@@ -1175,7 +1362,7 @@ index 942e852..aa7e130 100644
      GtkWidget *widget = GTK_WIDGET (user_data);
  
 -    gint idx = gtk_option_menu_get_history (omenu);
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gint idx = gtk_combo_box_get_active (GTK_COMBO_BOX (omenu));
 +#else
 +    gint idx = gtk_option_menu_get_history (GTK_OPTION_MENU (omenu));
@@ -1183,7 +1370,7 @@ index 942e852..aa7e130 100644
  
      for (int i = 0; preedit_style[i].data && i <= idx; i++) {
          if (i == idx &&
-@@ -1879,14 +2163,18 @@ on_dict_menu_label_toggled (GtkToggleButton *togglebutton,
+@@ -1879,14 +2180,18 @@ on_dict_menu_label_toggled (GtkToggleButton *togglebutton,
  }
  
  static void
@@ -1196,7 +1383,7 @@ index 942e852..aa7e130 100644
      gtk_list_store_clear (store);
  
 -    gint idx = gtk_option_menu_get_history (omenu);
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gint idx = gtk_combo_box_get_active (GTK_COMBO_BOX (omenu));
 +#else
 +    gint idx = gtk_option_menu_get_history (GTK_OPTION_MENU (omenu));
@@ -1204,7 +1391,7 @@ index 942e852..aa7e130 100644
  
      bool use_filter = false;
  
-@@ -1911,9 +2199,13 @@ on_key_category_menu_changed (GtkOptionMenu *omenu, gpointer user_data)
+@@ -1911,10 +2216,14 @@ on_key_category_menu_changed (GtkOptionMenu *omenu, gpointer user_data)
  }
  
  static void
@@ -1212,15 +1399,17 @@ index 942e852..aa7e130 100644
 +on_key_theme_menu_changed (GtkWidget *omenu, gpointer user_data)
  {
 -    gint idx = gtk_option_menu_get_history (omenu);
-+#if GTK_CHECK_VERSION(2, 4, 0)
+-    GtkWidget *menu = gtk_option_menu_get_menu (omenu);
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gint idx = gtk_combo_box_get_active (GTK_COMBO_BOX (omenu));
 +    gint theme_idx = idx - 2; // user definad and default
 +#else
 +    gint idx = gtk_option_menu_get_history (GTK_OPTION_MENU (omenu));
-     GtkWidget *menu = gtk_option_menu_get_menu (omenu);
++    GtkWidget *menu = gtk_option_menu_get_menu (GTK_OPTION_MENU (omenu));
      GList *list = gtk_container_get_children (GTK_CONTAINER (menu));
      GtkWidget *menuitem = GTK_WIDGET (g_list_nth_data (list, idx));
-@@ -1923,6 +2215,7 @@ on_key_theme_menu_changed (GtkOptionMenu *omenu, gpointer user_data)
+ 
+@@ -1923,6 +2232,7 @@ on_key_theme_menu_changed (GtkOptionMenu *omenu, gpointer user_data)
  
      gint theme_idx = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (menuitem),
                                                           INDEX_KEY));
@@ -1228,11 +1417,11 @@ index 942e852..aa7e130 100644
  
      // clear all key bindings
      if (idx != 0) {
-@@ -1974,9 +2267,15 @@ on_key_theme_menu_changed (GtkOptionMenu *omenu, gpointer user_data)
+@@ -1974,9 +2284,15 @@ on_key_theme_menu_changed (GtkOptionMenu *omenu, gpointer user_data)
  
      // sync widgets
      if (idx != KEY_THEME_INDEX_USER_DEFINED) {
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +        gtk_combo_box_set_active
 +            (GTK_COMBO_BOX (__widget_key_categories_menu),
 +             KEY_CATEGORY_INDEX_ALL);
@@ -1244,7 +1433,7 @@ index 942e852..aa7e130 100644
          gtk_widget_set_sensitive (__widget_key_filter, FALSE);
          gtk_widget_set_sensitive (__widget_key_filter_button, FALSE);
          GtkTreeModel *model;
-@@ -2041,8 +2340,13 @@ on_key_list_view_key_press (GtkWidget *widget, GdkEventKey *event,
+@@ -2041,8 +2357,13 @@ on_key_list_view_key_press (GtkWidget *widget, GdkEventKey *event,
      GtkTreeView *treeview = GTK_TREE_VIEW (widget);
  
      switch (event->keyval) {
@@ -1259,7 +1448,7 @@ index 942e852..aa7e130 100644
          break;
      }
 diff --git a/src/scim_anthy_setup_kana.cpp b/src/scim_anthy_setup_kana.cpp
-index 1cc4740..1aa7d36 100644
+index 1cc4740..4d3c2cc 100644
 --- a/src/scim_anthy_setup_kana.cpp
 +++ b/src/scim_anthy_setup_kana.cpp
 @@ -65,15 +65,15 @@ static GtkWidget *create_kana_window                 (GtkWindow            *pare
@@ -1326,7 +1515,7 @@ index 1cc4740..1aa7d36 100644
      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
      gtk_widget_show (label);
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    GtkWidget *omenu = gtk_combo_box_text_new ();
 +#else
      GtkWidget *omenu = gtk_option_menu_new ();
@@ -1371,7 +1560,7 @@ index 1cc4740..1aa7d36 100644
      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
      gtk_widget_show (label);
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    omenu = gtk_combo_box_text_new ();
 +#else
      omenu = gtk_option_menu_new ();
@@ -1436,7 +1625,7 @@ index 1cc4740..1aa7d36 100644
      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
      gtk_widget_show (label);
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    GtkWidget *omenu = gtk_combo_box_text_new ();
 +#else
      GtkWidget *omenu = gtk_option_menu_new ();
@@ -1447,7 +1636,7 @@ index 1cc4740..1aa7d36 100644
      gtk_box_pack_start (GTK_BOX (hbox), omenu, FALSE, FALSE, 2);
 -    setup_kana_layout_menu (GTK_OPTION_MENU (omenu));
 +    setup_kana_layout_menu (omenu);
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_set_active (
 +		GTK_COMBO_BOX (omenu),
 +		gtk_combo_box_get_active (GTK_COMBO_BOX (__widget_kana_layout_menu)));
@@ -1488,7 +1677,7 @@ index 1cc4740..1aa7d36 100644
      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
      gtk_widget_show (label);
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    GtkWidget *omenu = gtk_combo_box_text_new ();
 +#else
      GtkWidget *omenu = gtk_option_menu_new ();
@@ -1499,7 +1688,7 @@ index 1cc4740..1aa7d36 100644
      gtk_box_pack_start (GTK_BOX (hbox), omenu, FALSE, FALSE, 2);
 -    setup_nicola_layout_menu (GTK_OPTION_MENU (omenu));
 +    setup_nicola_layout_menu (omenu);
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_set_active (
 +		GTK_COMBO_BOX (omenu),
 +		gtk_combo_box_get_active (GTK_COMBO_BOX (__widget_nicola_layout_menu)));
@@ -1526,7 +1715,7 @@ index 1cc4740..1aa7d36 100644
 -setup_kana_layout_menu (GtkOptionMenu *omenu)
 +setup_kana_layout_menu (GtkWidget *omenu)
  {
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (omenu), _("User defined"));
 +    gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (omenu), _("Default"));
 +
@@ -1575,7 +1764,7 @@ index 1cc4740..1aa7d36 100644
 -setup_nicola_layout_menu (GtkOptionMenu *omenu)
 +setup_nicola_layout_menu (GtkWidget *omenu)
  {
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (omenu), _("User defined"));
 +	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (omenu), _("Default"));
 +
@@ -1625,7 +1814,7 @@ index 1cc4740..1aa7d36 100644
  static bool
  load_kana_layout (void)
  {
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gint idx = gtk_combo_box_get_active (GTK_COMBO_BOX (__widget_kana_layout_menu));
 +    gint theme_idx = idx - 2; // user definad and default
 +#else
@@ -1644,7 +1833,7 @@ index 1cc4740..1aa7d36 100644
  static bool
  load_nicola_layout (void)
  {
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gint idx = gtk_combo_box_get_active (GTK_COMBO_BOX (__widget_nicola_layout_menu));
 +    gint theme_idx = idx - 2; // user definad and default
 +#else
@@ -1672,7 +1861,7 @@ index 1cc4740..1aa7d36 100644
              G_OBJECT (__widget_kana_layout_menu),
              (gpointer) (on_kana_layout_menu_changed),
              NULL);
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +        gtk_combo_box_set_active (
 +            GTK_COMBO_BOX (__widget_kana_layout_menu),
 +            gtk_combo_box_get_active (GTK_COMBO_BOX (omenu)));
@@ -1689,7 +1878,7 @@ index 1cc4740..1aa7d36 100644
  on_kana_table_editor_added_entry (ScimAnthyTableEditor *editor, gpointer data)
  {
      // change menu item to "User defined"
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_set_active (
 +        GTK_COMBO_BOX (__widget_kana_layout_menu2),
 +        KANA_LAYOUT_INDEX_USER_DEFINED);
@@ -1705,7 +1894,7 @@ index 1cc4740..1aa7d36 100644
  on_kana_table_editor_removed_entry (ScimAnthyTableEditor *editor, gpointer data)
  {
      // change menu item to "User deined"
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_set_active (
 +        GTK_COMBO_BOX (__widget_kana_layout_menu2),
 +        KANA_LAYOUT_INDEX_USER_DEFINED);
@@ -1728,7 +1917,7 @@ index 1cc4740..1aa7d36 100644
              G_OBJECT (__widget_nicola_layout_menu),
              (gpointer) (on_nicola_layout_menu_changed),
              NULL);
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +        gtk_combo_box_set_active (
 +            GTK_COMBO_BOX (__widget_nicola_layout_menu),
 +            gtk_combo_box_get_active (GTK_COMBO_BOX (omenu)));
@@ -1745,7 +1934,7 @@ index 1cc4740..1aa7d36 100644
  on_nicola_table_editor_added_entry (ScimAnthyTableEditor *editor, gpointer data)
  {
      // change menu item to "User defined"
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_set_active (
 +        GTK_COMBO_BOX (__widget_nicola_layout_menu2),
 +        NICOLA_LAYOUT_INDEX_USER_DEFINED);
@@ -1761,7 +1950,7 @@ index 1cc4740..1aa7d36 100644
  on_nicola_table_editor_removed_entry (ScimAnthyTableEditor *editor, gpointer data)
  {
      // change menu item to "User deined"
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_set_active (
 +        GTK_COMBO_BOX (__widget_nicola_layout_menu2),
 +        NICOLA_LAYOUT_INDEX_USER_DEFINED);
@@ -1774,7 +1963,7 @@ index 1cc4740..1aa7d36 100644
      __style_changed = true;
  }
 diff --git a/src/scim_anthy_setup_romaji.cpp b/src/scim_anthy_setup_romaji.cpp
-index 5739c57..99b65aa 100644
+index 5739c57..6ead177 100644
 --- a/src/scim_anthy_setup_romaji.cpp
 +++ b/src/scim_anthy_setup_romaji.cpp
 @@ -55,14 +55,14 @@ static String __config_romaji_theme_file = SCIM_ANTHY_CONFIG_ROMAJI_THEME_FILE_D
@@ -1834,7 +2023,7 @@ index 5739c57..99b65aa 100644
      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
      gtk_widget_show (label);
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    GtkWidget *omenu = gtk_combo_box_text_new ();
 +#else
      GtkWidget *omenu = gtk_option_menu_new ();
@@ -1873,7 +2062,7 @@ index 5739c57..99b65aa 100644
      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
      gtk_widget_show (label);
  
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    GtkWidget *omenu = gtk_combo_box_text_new ();
 +#else
      GtkWidget *omenu = gtk_option_menu_new ();
@@ -1884,7 +2073,7 @@ index 5739c57..99b65aa 100644
      gtk_box_pack_start (GTK_BOX (hbox), omenu, FALSE, FALSE, 2);
 -    setup_romaji_theme_menu (GTK_OPTION_MENU (omenu));
 +    setup_romaji_theme_menu (omenu);
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_set_active (GTK_COMBO_BOX (omenu),
 +         gtk_combo_box_get_active (GTK_COMBO_BOX (__widget_romaji_theme_menu)));
 +#else
@@ -1908,7 +2097,7 @@ index 5739c57..99b65aa 100644
 -setup_romaji_theme_menu (GtkOptionMenu *omenu)
 +setup_romaji_theme_menu (GtkWidget *omenu)
  {
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (omenu), _("User defined"));
 +	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (omenu), _("Default"));
 +
@@ -1958,7 +2147,7 @@ index 5739c57..99b65aa 100644
  static bool
  load_romaji_theme (void)
  {
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    GtkWidget *omenu = __widget_romaji_theme_menu;
 +    gint idx = gtk_combo_box_get_active (GTK_COMBO_BOX (omenu));
 +	gint theme_idx = idx - 2; // 2: user-defined + default
@@ -1987,7 +2176,7 @@ index 5739c57..99b65aa 100644
              G_OBJECT (__widget_romaji_theme_menu),
              (gpointer) (on_romaji_theme_menu_changed),
              NULL);
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +        gtk_combo_box_set_active (
 +            GTK_COMBO_BOX (__widget_romaji_theme_menu),
 +            gtk_combo_box_get_active (GTK_COMBO_BOX (omenu)));
@@ -2004,7 +2193,7 @@ index 5739c57..99b65aa 100644
  on_table_editor_added_entry (ScimAnthyTableEditor *editor, gpointer data)
  {
      // change menu item to "User defined"
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_set_active (
 +        GTK_COMBO_BOX (__widget_romaji_theme_menu2),
 +        ROMAJI_THEME_INDEX_USER_DEFINED);
@@ -2020,7 +2209,7 @@ index 5739c57..99b65aa 100644
  on_table_editor_removed_entry (ScimAnthyTableEditor *editor, gpointer data)
  {
      // change menu item to "User deined"
-+#if GTK_CHECK_VERSION(2, 4, 0)
++#if GTK_CHECK_VERSION(2, 24, 0)
 +    gtk_combo_box_set_active (
 +        GTK_COMBO_BOX (__widget_romaji_theme_menu2),
 +        ROMAJI_THEME_INDEX_USER_DEFINED);
@@ -2033,10 +2222,10 @@ index 5739c57..99b65aa 100644
      __style_changed = true;
  }
 diff --git a/src/scim_anthy_table_editor.cpp b/src/scim_anthy_table_editor.cpp
-index 1a70123..abda8b7 100644
+index 1a70123..cdc660d 100644
 --- a/src/scim_anthy_table_editor.cpp
 +++ b/src/scim_anthy_table_editor.cpp
-@@ -132,10 +132,22 @@ scim_anthy_table_editor_init (ScimAnthyTableEditor *editor)
+@@ -132,10 +132,20 @@ scim_anthy_table_editor_init (ScimAnthyTableEditor *editor)
                               GTK_WIN_POS_CENTER_ON_PARENT);
  
      // edit area
@@ -2046,7 +2235,6 @@ index 1a70123..abda8b7 100644
      GtkWidget *hbox = gtk_hbox_new (FALSE, 0);
 +#endif
      gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-+
 +#if GTK_CHECK_VERSION(3, 0, 0)
 +    gtk_box_pack_start
 +		(GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (editor))),
@@ -2055,11 +2243,10 @@ index 1a70123..abda8b7 100644
      gtk_box_pack_start (GTK_BOX (GTK_DIALOG (editor)->vbox), hbox,
                          TRUE, TRUE, 0);
 +#endif
-+
      gtk_widget_show (hbox);
  
      // tree view area
-@@ -162,7 +174,11 @@ scim_anthy_table_editor_init (ScimAnthyTableEditor *editor)
+@@ -162,7 +172,11 @@ scim_anthy_table_editor_init (ScimAnthyTableEditor *editor)
      gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (treeview), TRUE);
  
      // button area
