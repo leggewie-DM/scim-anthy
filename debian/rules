@@ -1,9 +1,10 @@
 #!/usr/bin/make -f
 export DH_VERBOSE=1
 export DH_OPTIONS=-v
+export DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 %:
-	dh --with autotools-dev --with autoreconf $@
+	dh $@ --with autotools-dev,autoreconf
 
 # If --with autoreconf is not available, uncoment line
 # with "autoreconf -i -f" while 
@@ -12,7 +13,7 @@ export DH_OPTIONS=-v
 
 override_dh_auto_configure:
 #	autoreconf
-	dh_auto_configure -- --disable-static
+	dh_auto_configure -- $(shell dpkg-buildflags --export=configure) --disable-static
 
 override_dh_auto_build:
 	dh_auto_build
@@ -23,6 +24,6 @@ override_dh_makeshlibs:
 override_dh_auto_install:
 	dh_auto_install
 	# these are not used.
-	rm debian/scim-anthy/usr/lib/scim-1.0/*/*/*.la
+	rm debian/scim-anthy/usr/lib/$(DEB_HOST_MULTIARCH)/scim-1.0/*/*/*.la
 
 # vim:textwidth=0:
