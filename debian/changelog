@@ -1,3 +1,16 @@
+scim-anthy (1.2.7-5) unstable; urgency=low
+
+  [ Tz-Huan Huang ]
+  * debian/rules:
+    - make sure the package builds against a multi-archified libscim-dev
+    - use hardened build flags
+  * Update gtk3.patch to include the UI part fixes. Closes: #682601
+
+  [ Rolf Leggewie ]
+  * debian/control: bump build dependency to multi-archified libscim-dev
+
+ -- Rolf Leggewie <foss@rolf.leggewie.biz>  Thu, 09 Aug 2012 01:37:40 +0800
+
 scim-anthy (1.2.7-4) unstable; urgency=low
 
   [ Tz-Huan Huang ]
