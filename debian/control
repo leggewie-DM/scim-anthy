@@ -1,8 +1,8 @@
 Source: scim-anthy
 Section: utils
 Priority: optional
-Maintainer: Ikuya Awashiro <ikuya@oooug.jp>
-Uploaders: Rolf Leggewie <foss@rolf.leggewie.biz>, Osamu Aoki <osamu@debian.org>
+Maintainer: Rolf Leggewie <foss@rolf.leggewie.biz>
+Uploaders: Ikuya Awashiro <ikuya@oooug.jp>, Osamu Aoki <osamu@debian.org>
 Build-Depends: debhelper (>= 7.0.50~), libanthy-dev,
  scim (>= 1.4.6), libscim-dev (>= 1.4.14-2), autotools-dev, pkg-config,
  dh-autoreconf, libltdl-dev
