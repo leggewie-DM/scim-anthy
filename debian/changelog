@@ -1,3 +1,12 @@
+scim-anthy (1.2.7-6) unstable; urgency=low
+
+  * control:
+    - drop obsolete DMUA field
+    - bump standard to 3.9.4
+    - switch roles of maintainer and uploader between Ikuya-san and me
+
+ -- Rolf Leggewie <foss@rolf.leggewie.biz>  Fri, 14 Jun 2013 17:24:56 +0900
+
 scim-anthy (1.2.7-5) unstable; urgency=low
 
   [ Tz-Huan Huang ]
