@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Rolf Leggewie <foss@rolf.leggewie.biz>
 Uploaders: Ikuya Awashiro <ikuya@oooug.jp>, Osamu Aoki <osamu@debian.org>
 Build-Depends: debhelper (>= 7.0.50~), libanthy-dev,
- scim (>= 1.4.6), libscim-dev (>= 1.4.14-2), autotools-dev, pkg-config,
+ scim (>= 1.4.6), libscim-dev (>= 1.4.6), autotools-dev, pkg-config,
  dh-autoreconf, libltdl-dev
 Standards-Version: 3.9.4
 Homepage: http://sourceforge.jp/projects/scim-imengine/
