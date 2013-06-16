@@ -1,3 +1,10 @@
+scim-anthy (1.2.7-6~bpo70+1) wheezy-backports; urgency=low
+
+  * control: drop build-dependency on libscim-dev back to 1.4.6
+  * rules: la files are still in non-MA file paths in wheezy
+
+ -- Rolf Leggewie <foss@rolf.leggewie.biz>  Sun, 16 Jun 2013 16:14:33 +0900
+
 scim-anthy (1.2.7-6) unstable; urgency=low
 
   * control:
